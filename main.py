@@ -3,6 +3,18 @@ import pygame.mouse
 from constants import *
 from simulation import Simulation
 
+# TODO
+# Make text boxes clickable
+# add saving to file and loading from file and add tabs for graphs
+# create vehicles with start locations and destinations
+# Write A* for vehicle pathing
+# Create vehicle movement and timing/scoring for vehicles
+# Add delays based on traffic density
+# Return statistics on simulations (with matplotlib graphs)
+
+# Start ACO and other algorithms
+
+
 if __name__ == '__main__':
     # Titles the game
     pygame.display.set_caption('Rush Hour Traffic')
@@ -21,6 +33,9 @@ if __name__ == '__main__':
             if e.type == pygame.QUIT:
                 executing = False
             elif e.type == pygame.MOUSEBUTTONDOWN:
+                # First prioritize clicks on text boxes
+
+
                 # Gets the points that the mouse clicked
                 points_clicked = s.getGraph().getPointsClicked(e.pos)
 
@@ -70,6 +85,7 @@ if __name__ == '__main__':
             display.fill((14, 25, 36))
 
             s.getGraph().drawEdges()
+            s.getGraph().updateTextBoxes()
             s.getGraph().updatePoints()
 
             update = False

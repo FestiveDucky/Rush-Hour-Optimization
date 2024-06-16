@@ -1,4 +1,4 @@
-from random import randint as ri
+import random
 import pygame
 import ctypes
 from math import *
@@ -37,7 +37,10 @@ LINE_THICKNESS = HEIGHT/720
 ORANGE = (243, 170, 78)
 DARK_BLUE = (17, 24, 32)
 SEMI_DARK_BLUE = (47, 54, 62)
-BLUE = (77, 84, 92)
+GREY = (77, 84, 92)
+BLUE = (33, 66, 131)
+LIGHTER_BLUE = (52, 104, 207)
+LIGHT_BLUE =(64, 128, 255)
 WHITE = (255, 255, 255)
 
 def events(nested=False):
