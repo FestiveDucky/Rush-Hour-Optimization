@@ -9,8 +9,7 @@ class TextBox(pygame.sprite.Sprite):
         self.pos = pos
 
         self.rect = pygame.Rect(pos[0], pos[1], self.size * 1.3, self.size)
-        self.rect.topleft = (pos[0] + self.size / 6, pos[1] + self.size / 6)
-
+        self.setCenter(pos)
         # Stores the rendered text
         self.text = None
         self.selected = False
@@ -20,6 +19,9 @@ class TextBox(pygame.sprite.Sprite):
         # The text that is typed by the user
         self.typedText = text
 
+    def setCenter(self, location):
+        self.rect.center = (location[0] + self.size / 6, location[1] + self.size / 6)
+
     def updateText(self, text):
         # Automatically resize the text box based on text size
         self.rect.width = self.size * (1.3 + 0.3 * (len(text) - 2))
@@ -27,13 +29,7 @@ class TextBox(pygame.sprite.Sprite):
 
     def update(self):
         pygame.draw.rect(display, (46, 80, 102) if self.selected else (23, 40, 52), self.rect, int(self.size/20))
-        display.blit(self.text, (self.pos[0] + self.size / 2, self.pos[1] + self.size / 2.55))
-
-        # color = (10, 10, 10)
-        # if self.enabled:
-        #     color = (10, 100, 80)
-        #
-        # pygame.draw.rect(self.display, color, pygame.Rect(self.pos[0] + self.size/6, self.pos[1] + self.size/6, self.size*2/3, self.size*2/3))
+        display.blit(self.text, (self.rect.topleft[0] + self.size/3, self.rect.topleft[1] + self.size/4))
 
     def typing(self, numbersOnly=False):
         self.typedText = ""
@@ -52,8 +48,8 @@ class TextBox(pygame.sprite.Sprite):
                     elif e.key == pygame.K_BACKSPACE:
                         self.typedText = self.typedText[:-1]
                     else:
-                        if numbersOnly and e.unicode in [".", " ", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8",
-                                                         "9"] and len(self.typedText) < 14:
+                        if numbersOnly and e.unicode in [".", "0", "1", "2", "3", "4", "5", "6", "7", "8",
+                                                         "9"] and len(self.typedText) < 7:
                             self.typedText += e.unicode
                         elif not numbersOnly:
                             self.typedText += e.unicode

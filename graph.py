@@ -22,7 +22,11 @@ class UndirectedGraph:
         self.edge_weight_textboxes_group = pygame.sprite.LayeredUpdates()
 
     def addPoint(self, location):
-        self.points.append(Point(location, self.point_group))
+        # Makes sure that the point is added on the screen
+        x = max(min(WIDTH - LINE_THICKNESS * 2, location[0]), LINE_THICKNESS * 2)
+        y = max(min(HEIGHT - LINE_THICKNESS * 2, location[1]), LINE_THICKNESS * 2)
+
+        self.points.append(Point((x, y), self.point_group))
         self.adjacency_list[self.points[-1]] = set()
 
     def removePoint(self, location):
@@ -55,6 +59,11 @@ class UndirectedGraph:
         x = max(min(WIDTH - LINE_THICKNESS * 2, new_location[0]), LINE_THICKNESS * 2)
         y = max(min(HEIGHT - LINE_THICKNESS * 2, new_location[1]), LINE_THICKNESS * 2)
 
+        # Move the text boxes if there are edges coming out of the point
+        for other_point in self.adjacency_list[self.moving_point]:
+            mid_point = pointOnLine(self.moving_point.getCoords(), other_point.getCoords(), 0.5)
+            self.edge_weights[(self.moving_point, other_point)].setCenter(mid_point)
+
         self.moving_point.setCoords((x, y))
         return True
 
@@ -63,6 +72,9 @@ class UndirectedGraph:
 
     def getPointsClicked(self, location):
         return self.point_group.get_sprites_at(location)
+
+    def getTextBoxesClicked(self, location):
+        return self.edge_weight_textboxes_group.get_sprites_at(location)
 
     def addEdge(self):
         if self.selected_point2 is None or self.selected_point1 in self.adjacency_list[self.selected_point2]:
@@ -82,8 +94,6 @@ class UndirectedGraph:
         # Save the edge weights
         self.edge_weights[(self.selected_point1, self.selected_point2)] = textbox
         self.edge_weights[(self.selected_point2, self.selected_point1)] = textbox
-
-
 
     def deleteEdge(self):
         if self.selected_point2 is None or self.selected_point1 not in self.adjacency_list[self.selected_point2]:

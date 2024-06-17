@@ -4,8 +4,8 @@ from constants import *
 from simulation import Simulation
 
 # TODO
-# Make text boxes clickable
 # add saving to file and loading from file and add tabs for graphs
+# Add button to swap into simulation mode which prevents graph editing
 # create vehicles with start locations and destinations
 # Write A* for vehicle pathing
 # Create vehicle movement and timing/scoring for vehicles
@@ -34,16 +34,18 @@ if __name__ == '__main__':
                 executing = False
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 # First prioritize clicks on text boxes
-
-
-                # Gets the points that the mouse clicked
-                points_clicked = s.getGraph().getPointsClicked(e.pos)
-
-                if len(points_clicked) == 0:
-                    s.getGraph().addPoint(e.pos)
-                    s.getGraph().clearSelectedPoints()
+                textboxes_clicked = s.getGraph().getTextBoxesClicked(e.pos)
+                if len(textboxes_clicked) != 0:
+                    textboxes_clicked[0].typing(True)
                 else:
-                    s.getGraph().setMovingPoint(points_clicked[0])
+                    # Gets the points that the mouse clicked
+                    points_clicked = s.getGraph().getPointsClicked(e.pos)
+
+                    if len(points_clicked) == 0:
+                        s.getGraph().addPoint(e.pos)
+                        s.getGraph().clearSelectedPoints()
+                    else:
+                        s.getGraph().setMovingPoint(points_clicked[0])
 
                 update = True
             elif e.type == pygame.MOUSEMOTION:
