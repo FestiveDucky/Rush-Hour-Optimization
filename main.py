@@ -4,20 +4,45 @@ from constants import *
 from simulation import Simulation
 
 # TODO
-# add saving to file and loading from file
-# Add button to swap into simulation mode which prevents graph editing
-# create vehicles with start locations and destinations
-# Write A* for vehicle pathing
-# Create vehicle movement and timing/scoring for vehicles
-# Add delays based on traffic density
+# MAKE SURE THE GRAPH IS PLANAR (no edges overlap)
+# create random pairs of vertices
+# add saving to file and loading from file for graphs
+# (for now seed the random number generator for pairs of vertices)
+# Write dijkstra and run it for one vertex in each pair (if one of the vertices already has it ran, don't run it)
+#       optimize # of dijkstra runs by taking the most occuring vertex in all the pairs and running dijkstra on that
+#       then remove all of the pairs of that vertex from the frequency list and run dijkstra on the most frequent vertex again
+#       Repeat until all vertices have a frequency of 0
+# Calculate cost with just dijkstra runs
+# Run modified A* from each vertex in the pair that does not have dijkstra run from it
+# Repeat until no new paths are generated for every pair
 # Return statistics on simulations (with matplotlib graphs)
+#       Improvement of cost for every iteration over the minimum number (n pairs)
+#       Histogram or something on possible percent improvement in travel time (need to relate traffic density to travel time)
+#       Graph of average traffic density along the path and average length of the paths
 
-# Start ACO and other algorithms
+# Proof of correctness / optimality of algorithm
+# Runtime of algorithm
+#      Expected number of iterations + worst case number of iterations
 
+# ===============================
+# KEYBINDS
+# LEFT CLICK: places a new point
+# r: removes the nearest point
+# SPACE: manually updates the screen
+# s: selects the nearest point
+# ESC: clears the selected point
+# e: adds an edge between the two selected points
+# d: deletes the edge between the two selected points
+# LEFT: Decrements the graph index and loads the new graph
+# RIGHT: Increments the graph index and loads the new graph
+# a: saves the graph manually
+# f: finishes with graph editing
+# ===============================
 
 if __name__ == '__main__':
+
     # Titles the game
-    pygame.display.set_caption('Rush Hour Traffic')
+    pygame.display.set_caption('Traffic Distribution')
     clock = pygame.time.Clock()
 
     s = Simulation()
@@ -27,6 +52,7 @@ if __name__ == '__main__':
     graph_index = 0
 
     executing = True
+    doneGraphEditing = False
     update = True
     # Starting the game loop
     while executing:
@@ -37,7 +63,7 @@ if __name__ == '__main__':
         for e in events:
             if e.type == pygame.QUIT:
                 executing = False
-            elif e.type == pygame.MOUSEBUTTONDOWN:
+            elif e.type == pygame.MOUSEBUTTONDOWN and not doneGraphEditing:
                 # First prioritize clicks on text boxes
                 textboxes_clicked = s.getGraph(graph_index).getTextBoxesClicked(e.pos)
                 if len(textboxes_clicked) != 0:
@@ -53,9 +79,9 @@ if __name__ == '__main__':
                         s.getGraph(graph_index).setMovingPoint(points_clicked[0])
 
                 update = True
-            elif e.type == pygame.MOUSEMOTION:
+            elif e.type == pygame.MOUSEMOTION and not doneGraphEditing:
                 update = s.getGraph(graph_index).movePoint(e.pos)
-            elif e.type == pygame.MOUSEBUTTONUP:
+            elif e.type == pygame.MOUSEBUTTONUP and not doneGraphEditing:
                 s.getGraph(graph_index).setMovingPoint(None)
                 update = True
             elif e.type == pygame.KEYDOWN:
@@ -69,28 +95,38 @@ if __name__ == '__main__':
                 elif e.key == pygame.K_SPACE:
                     update = True
                 # Select a point
-                elif e.key == pygame.K_s:
+                elif e.key == pygame.K_s and not doneGraphEditing:
                     s.getGraph(graph_index).selectPoint(pygame.mouse.get_pos())
                     update = True
                 # Clear selected points
-                elif e.key == pygame.K_ESCAPE:
+                elif e.key == pygame.K_ESCAPE and not doneGraphEditing:
                     s.getGraph(graph_index).clearSelectedPoints()
                     update = True
                 # Adds an edge
-                elif e.key == pygame.K_e:
+                elif e.key == pygame.K_e and not doneGraphEditing:
                     s.getGraph(graph_index).addEdge()
                     update = True
                 # Deletes the edge between the selected points
-                elif e.key == pygame.K_d:
+                elif e.key == pygame.K_d and not doneGraphEditing:
                     s.getGraph(graph_index).deleteEdge()
                     update = True
-                elif e.key == pygame.K_LEFT:
+                elif e.key == pygame.K_LEFT and not doneGraphEditing:
                     graph_index -= 1
                     graph_index = max(0, graph_index)
+                    s.saveGraphs()
                     update = True
-                elif e.key == pygame.K_RIGHT:
+                elif e.key == pygame.K_RIGHT and not doneGraphEditing:
                     graph_index += 1
+                    s.saveGraphs()
                     update = True
+                elif e.key == pygame.K_a:
+                    s.saveGraphs()
+                elif e.key == pygame.K_f:
+                    s.getGraph(graph_index).clearSelectedPoints()
+                    s.getGraph(graph_index).setMovingPoint(None)
+                    doneGraphEditing = True
+                    update = True
+                    s.saveGraphs()
 
         s.tick()
 
@@ -98,7 +134,7 @@ if __name__ == '__main__':
         if update:
             display.fill((14, 25, 36))
 
-            s.getGraph(graph_index).drawEdges()
+            s.getGraph(graph_index).updateEdges()
             s.getGraph(graph_index).updateTextBoxes()
             s.getGraph(graph_index).updatePoints()
 
