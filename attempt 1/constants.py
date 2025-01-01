@@ -9,7 +9,7 @@ fullscreen = True
 
 pygame.init()
 
-PATH_FOR_FILE_EXPORT = fr"C:\Users\alexr\Documents\GitHub\ScienceResearchProject"
+PATH_FOR_FILE_EXPORT = fr"/"
 
 # Automatically resizes everything for you
 ctypes.windll.user32.SetProcessDPIAware()

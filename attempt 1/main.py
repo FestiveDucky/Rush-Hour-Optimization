@@ -4,6 +4,30 @@ from constants import *
 from simulation import Simulation
 
 # TODO
+
+# Modification: use time as a 3rd dimension to improve speeds
+# Possily try different fitness functions: one just calculates average length of all routes, one calculates based on maximum length route (prevents individuals getting screwed)
+# Possibly try out different pheremone update techniques instead of iteration  best or global best or
+# use repellent pheremones
+
+# SINGLE DESTINATION ROUTING (on black friday days, events, concerts)
+# Bus Routing
+# Carpooling for after school activities eg. soccer and art classes
+# efficient locations to add bike lanes in cities and towns (like Millburn) (Consider new jersey)
+# Civil engineering -> determining which roads need to be expanded or added to improve traffic congestion
+# Internal Combustion Engines vs electric cars on roads (environment stuff)
+# New Jerseys beaches (spacing out, air temperature)
+
+
+
+#==============================================================
+# ALTERNATE ALG
+# Get all paths from origin to destination for each vehicle that are under a certain threshold in length
+# Run a simulation and see high density traffic regions
+# Choose secondary path for the vehicle that minimizes traffic and
+#==============================================================
+
+
 # MAKE SURE THE GRAPH IS PLANAR (no edges overlap)
 # create random pairs of vertices
 # add saving to file and loading from file for graphs
@@ -14,7 +38,11 @@ from simulation import Simulation
 #       Repeat until all vertices have a frequency of 0
 # Calculate cost with just dijkstra runs
 # Run modified A* from each vertex in the pair that does not have dijkstra run from it
+#   Modified A* has custom cost function which dynamically adjusts based on total # vehicles in simulation
+#   (NOT NOW) Have heuristic be based on time (only based on when vehicles reach that point -> based on length of A* path)
 # Repeat until no new paths are generated for every pair
+#       We can either accept a new path if is strictly better than the current one (score calculated based on average travel times + worst case differnce in travel time)
+#       Or we can also accept paths with the same score as our current path (may open other better paths) -> need to worry about loops
 # Return statistics on simulations (with matplotlib graphs)
 #       Improvement of cost for every iteration over the minimum number (n pairs)
 #       Histogram or something on possible percent improvement in travel time (need to relate traffic density to travel time)
@@ -23,6 +51,8 @@ from simulation import Simulation
 # Proof of correctness / optimality of algorithm
 # Runtime of algorithm
 #      Expected number of iterations + worst case number of iterations
+
+# Allow for the inclusion of already existing traffic
 
 # ===============================
 # KEYBINDS
