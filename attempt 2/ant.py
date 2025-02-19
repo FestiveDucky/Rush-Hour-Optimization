@@ -36,23 +36,19 @@ class Ant:
                     self.parent.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(
                         self.parent.pheromones[min(v - 1, u - 1)][max(u - 1, v - 1)], MAX_PHEROMONE_VALUE)
 
-                    #TODO use global pheromone for these weights && heuristic function
-
                     # Calculates the weight of the edge
 
-                    b = 3 # Pheromone exponent
-                    c = 4 # Heuristic exponent
-                    d = 1 # traffic density exponent
-
                     # local pheromone
-                    weight = math.pow(1 + self.parent.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] / MAX_PHEROMONE_VALUE, b)
+                    weight = math.pow(1 + self.parent.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] / MAX_PHEROMONE_VALUE, PHEROMONE_EXPONENT)
                     if HEURISTIC_FUNCTION:
                         # heuristic (current point dist to end - next point dist to end) (how much distance we save)
                         # First 0.5 means that if we move really far away from destination we will scale by 0.5
                         # but if we move really close then we scale by 1.5
-                        weight *= math.pow(0.5 + 0.5 + 1e-18 + 0.5 * (self.parent.simulation.heuristics[self.parent.end][v - 1] - self.parent.simulation.heuristics[self.parent.end][u - 1])/MAX_ROAD_LENGTH, c)
-                    # Global pheromone
-                    weight *= math.pow(2 - self.parent.simulation.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] / NUM_VEHICLES, d)
+                        weight *= math.pow(0.5 + 0.5 + 1e-18 + 0.5 * (self.parent.simulation.heuristics[self.parent.end][v - 1] - self.parent.simulation.heuristics[self.parent.end][u - 1])/MAX_ROAD_LENGTH, HEURISTIC_EXPONENT)
+                    if USE_GLOBAL_PHEROMONE:
+                        # Global pheromone
+                        weight *= math.pow(2 - self.parent.simulation.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] / NUM_VEHICLES, GLOBAL_EXPONENT)
+
                     # print(f"WEIGHT: {weight}, Length {self.parent.graph.edgeWeight(v, u)}, Pheromone {self.parent.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)]}, Heuristic {(self.parent.simulation.heuristics[self.parent.end][v - 1] - self.parent.simulation.heuristics[self.parent.end][u - 1])}, Global {self.parent.simulation.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]}")
 
                     weights.append(weight)
@@ -71,21 +67,16 @@ class Ant:
             # Choose a random edge using the weights
             path.append(random.choices(neighbors, weights)[0])
 
-            # Exponential traffic cost multiplier (capped at 5x)
-            # -> 1 + max(x^exp/n^exp)
+            roadLength = self.parent.graph.edgeWeight(path[-2], path[-1])
+            globalPheromone = self.parent.simulation.globalTrafficDensity[min(path[-2] - 1, path[-1] - 1)][
+                max(path[-2] - 1, path[-1] - 1)]
+            # Exponential traffic cost multiplier (1 + x^exp/n^exp)
             if COST_BASED_ON_TRAFFIC_DENSITY:
-                score += self.parent.graph.edgeWeight(path[-2], path[-1]) * (1 + (MAX_TRAFFIC_MULTIPLIER - 1)
-                                                                             * math.pow(
-                            self.parent.simulation.globalTrafficDensity[min(path[-2] - 1, path[-1] - 1)][
-                                max(path[-2] - 1, path[-1] - 1)], GLOBAL_PHEROMONE_EXPONENT)
-                                                                             / math.pow(NUM_VEHICLES,
-                                                                                        GLOBAL_PHEROMONE_EXPONENT))
+                score += roadLength * math.pow(globalPheromone, GLOBAL_PHEROMONE_EXPONENT) / math.pow(roadLength/MIN_ROAD_SPACE_PER_CAR, GLOBAL_PHEROMONE_EXPONENT)
+                # assuming each car needs around 15 m of space -> around 10m of space will result in severe traffic
             else:
-                # Linear traffic cost multiplier
-                # score += self.parent.graph.edgeWeight(path[-2], path[-1]) * (1 + self.parent.simulation.globalTrafficDensity[min(path[-2] - 1, path[-1] - 1)][max(path[-2] - 1, path[-1] - 1)] / NUM_VEHICLES)
-
-                # No Traffic cost
-                score += self.parent.graph.edgeWeight(path[-2], path[-1])
+                # Cost not based on traffic density
+                score += roadLength
 
         # Add extra penalty if the path does not reach the destination
         if path[-1] != self.parent.end:

@@ -113,8 +113,18 @@ class Simulation:
                         v = path[0][j - 1]
                         u = path[0][j]
 
-                        commonScore += self.graph.edgeWeight(u, v) * (1 + (MAX_TRAFFIC_MULTIPLIER - 1) * math.pow(
-                            self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)],
-                            GLOBAL_PHEROMONE_EXPONENT) / math.pow(NUM_VEHICLES, GLOBAL_PHEROMONE_EXPONENT))
+                        # commonScore += self.graph.edgeWeight(u, v) * (1 + (MAX_TRAFFIC_MULTIPLIER - 1) * math.pow(
+                        #     self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)],
+                        #     GLOBAL_PHEROMONE_EXPONENT) / math.pow(NUM_VEHICLES, GLOBAL_PHEROMONE_EXPONENT))
+                        # Exponential traffic cost multiplier (1 + x^exp/n^exp)
+
+                    roadLength = self.graph.edgeWeight(u, v)
+                    globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
+                    if COST_BASED_ON_TRAFFIC_DENSITY:
+                        commonScore += roadLength * math.pow(globalPheromone, GLOBAL_PHEROMONE_EXPONENT) / math.pow(
+                                roadLength / MIN_ROAD_SPACE_PER_CAR, GLOBAL_PHEROMONE_EXPONENT)
+                    else:
+                        # Cost not based on traffic density
+                        commonScore += roadLength
 
                     print(f"Iter: {i}, score: {path[1]}, path: {path[0]}, common score: {commonScore}")

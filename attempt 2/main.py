@@ -13,7 +13,6 @@ if __name__ == '__main__':
     s.execute(500)
     print(f"Execution time: {time.time() - start}")
 
-# TODO Design cost function for travel time of vehicles along entire paths
 # TODO add matplotlib data analysis (execution time, cost values of the routes
 # TODO Compare to shortest paths using dijkstra
 # TODO Test global pheromone avoidance and tune cost function variables (for edge selection)
