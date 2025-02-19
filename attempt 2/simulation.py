@@ -17,7 +17,6 @@ class Simulation:
 
         # Generate random graph
         self.generateGraph()
-        print(self.graph.adjList)
 
         self.destinations = set()
         # Generate vehicles
@@ -31,7 +30,8 @@ class Simulation:
 
         # key: destination, value: list of vertices and their distance from the end location
         self.heuristics = {}
-        self.dijkstra()
+        if HEURISTIC_FUNCTION:
+            self.dijkstra()
 
     def dijkstra(self):
         for destination in self.destinations:
@@ -57,14 +57,12 @@ class Simulation:
                     prev = distances[neighbor - 1]
                     distances[neighbor - 1] = min(distances[neighbor - 1], current[1] + self.graph.edgeWeight(current[0], neighbor))
                     if prev != distances[neighbor - 1]:
-                        print("CHANGING", neighbor, distances[neighbor - 1])
                         unvisited[neighbor] = distances[neighbor - 1]
 
             self.heuristics[destination] = distances
-        print(self.heuristics)
-        print(self.heuristics[self.vehicles[0].end][self.vehicles[0].start - 1])
 
     def generateGraph(self):
+        # Generates a random graph with random weights
         self.graph = Graph()
         for i in range(N_VERTICES):
             self.graph.addVertex()
@@ -78,13 +76,15 @@ class Simulation:
         return v.iterate()
 
     def execute(self, iterations):
+        pool = None
         if MULTIPROCESSING:
             pool = multiprocessing.Pool(processes=8)
+
         bestPath = (None, math.inf)
         for i in range(iterations):
+            # paths: (path, score)
             if MULTIPROCESSING:
                 paths = list(pool.map(self.iterate, self.vehicles))
-
             else:
                 paths = []
                 for vehicle in self.vehicles:
@@ -97,29 +97,24 @@ class Simulation:
                     v = p[0][j - 1]
                     u = p[0][j]
                     self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
+                    self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(NUM_VEHICLES, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
+
 
             if not PRINT_ALL_ITERATIONS:
                 sys.stdout.write(f"\rCompleted: {100 * (i + 1) / iterations}%")
                 sys.stdout.flush()
 
             # Final analysis
-            # TODO possibly change the path for final output to be the best path over all iterations
-            for p in paths:
-                if PRINT_ALL_ITERATIONS or i == iterations - 1:
-
-                    # COST FUNCTION
+            if PRINT_ALL_ITERATIONS or i == iterations - 1:
+                for path in paths:
+                    # COST FUNCTION NEEDED BECAUSE DURING EXECUTION GLOBAL PHEROMONES ARE NOT UPDATED
                     commonScore = 0
-                    for j in range(1, len(p[0])):
-                        v = p[0][j - 1]
-                        u = p[0][j]
+                    for j in range(1, len(path[0])):
+                        v = path[0][j - 1]
+                        u = path[0][j]
 
-                        commonScore += self.graph.edgeWeight(u, v) * (1 + (MAX_TRAFFIC_MULTIPLIER - 1)
-                                                                      * math.pow(
-                                    self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)],
-                                    TRAFFIC_MULTIPLIER_EXPONENT)
-                                                                      / math.pow(NUM_VEHICLES,
-                                                                                 TRAFFIC_MULTIPLIER_EXPONENT))
+                        commonScore += self.graph.edgeWeight(u, v) * (1 + (MAX_TRAFFIC_MULTIPLIER - 1) * math.pow(
+                            self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)],
+                            GLOBAL_PHEROMONE_EXPONENT) / math.pow(NUM_VEHICLES, GLOBAL_PHEROMONE_EXPONENT))
 
-                    print(f"Iter: {i}, score: {p[1]}, path: {p[0]}, common score: {commonScore}")
-
-    # print(bestPath)
+                    print(f"Iter: {i}, score: {path[1]}, path: {path[0]}, common score: {commonScore}")

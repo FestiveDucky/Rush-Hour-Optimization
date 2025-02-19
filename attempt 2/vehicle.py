@@ -9,7 +9,6 @@ from constants import *
 
 class Vehicle:
     def __init__(self, start, end, graph, simulation):
-        # print("START", start, "END:", end)
         self.ants = []
         self.start = start
         self.end = end
@@ -26,11 +25,11 @@ class Vehicle:
     def iterate(self):
         # start = time.time()
 
-        bestPath = (None, math.inf) # First value is the path which stores vertices, second value is path score
+        bestPath = (None, float('inf')) # First value is the path which stores vertices, second value is path score
         for ant in self.ants:
-            p = ant.generatePath()
-            if p[1] < bestPath[1]:
-                bestPath = p
+            path = ant.generatePath()
+            if path[1] < bestPath[1]:
+                bestPath = path
 
         # print(f"Generate paths time: {time.time() - start}")
 
@@ -41,9 +40,8 @@ class Vehicle:
         if not EFFICIENT_DECAY_RATES:
             self.pheromones *= PHEROMONE_DECAY_RATE
 
-            # limits the minimum value of the pheromones
-            if PHEROMONE_LIMITS_FLOOR:
-                self.pheromones[self.pheromones < MIN_PHEROMONE_VALUE] = MIN_PHEROMONE_VALUE
+            # Limits the range of pheromone values
+            np.clip(self.pheromones, MIN_PHEROMONE_VALUE, MAX_PHEROMONE_VALUE)
 
         # print(f"Decay time: {time.time() - start}")
 
@@ -58,16 +56,15 @@ class Vehicle:
                 self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] *= math.pow(PHEROMONE_DECAY_RATE, self.timesDecayed - self.lastDecayed[min(u - 1, v - 1)][max(u - 1, v - 1)])
                 self.lastDecayed[min(u - 1, v - 1)][max(u - 1, v - 1)] = self.timesDecayed
 
-                # Limits the minimum value of pheromones
-                if PHEROMONE_LIMITS_FLOOR:
-                    self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] = max(
-                        self.pheromones[min(v - 1, u - 1)][max(u - 1, v - 1)], MIN_PHEROMONE_VALUE)
+                # Limits the range of values of the pheromones:
+                self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] = max(self.pheromones[min(v - 1, u - 1)][max(u - 1, v - 1)], MIN_PHEROMONE_VALUE)
+                self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(self.pheromones[min(v - 1, u - 1)][max(u - 1, v - 1)], MAX_PHEROMONE_VALUE)
+
 
             # Updates pheromones
             self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] += PHEROMONE_DEPOSIT_CONSTANT/bestPath[1]
 
         # print(f"Pheromone update time: {time.time() - start}")
-        # print(self.pheromones)
         return bestPath
 
     def roundPheromones(self):
