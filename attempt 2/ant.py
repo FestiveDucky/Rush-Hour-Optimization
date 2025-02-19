@@ -13,6 +13,7 @@ class Ant:
         while path[-1] != self.parent.end and len(path) < MAX_PATH_LENGTH:
             neighbors = self.parent.graph.neighbors(path[-1])
             weights = []
+            largestWeight = 0
             cummulativeTotal = 0
             for neighbor in neighbors:
                 # Makes the ant never go backwards
@@ -30,16 +31,23 @@ class Ant:
                                                                                               max(u - 1, v - 1)])
                         self.parent.lastDecayed[min(u - 1, v - 1)][max(u - 1, v - 1)] = self.parent.timesDecayed
 
-                    #TODO use global pheromone for these weights -> avoid dense areas
-                    # TODO make the weights adjustable
-                    # Calculate the weight
-                    # 1/distance * pheromone *
+                    #TODO use global pheromone for these weights && heuristic function
+
+                    # Calculates the weight
+                    # 1/distance * local pheromone
                     weights.append(1/self.parent.graph.edgeWeight(v, u) * self.parent.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)])
+                    largestWeight = max(weights[-1], largestWeight)
                     cummulativeTotal += weights[-1]
 
             # If there is nowhere to go we just stop
             if cummulativeTotal == 0:
                 break
+
+            # Limits maximum value of a pheromone
+            if EDGE_SELECTION_LIMITS and largestWeight / cummulativeTotal > p and largestWeight != cummulativeTotal: # If the probability of being selected is greater than p and not 100%
+                # print(largestWeight)
+                weights[weights.index(largestWeight)] -= (largestWeight - p * cummulativeTotal) / (1 - p)
+
             path.append(random.choices(neighbors, weights)[0])
 
 
