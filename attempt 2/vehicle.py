@@ -18,6 +18,7 @@ class Vehicle:
         self.heuristic = np.full((graph.n, graph.n), INITIAL_PHEROMONE_VALUE)
         self.lastDecayed = np.zeros((graph.n, graph.n))
         self.timesDecayed = 0
+        self.best = float('inf')
 
         for i in range(NUM_ANTS):
             self.ants.append(Ant(self))
@@ -56,15 +57,18 @@ class Vehicle:
                 self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] *= math.pow(PHEROMONE_DECAY_RATE, self.timesDecayed - self.lastDecayed[min(u - 1, v - 1)][max(u - 1, v - 1)])
                 self.lastDecayed[min(u - 1, v - 1)][max(u - 1, v - 1)] = self.timesDecayed
 
-                # Limits the range of values of the pheromones:
-                self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] = max(self.pheromones[min(v - 1, u - 1)][max(u - 1, v - 1)], MIN_PHEROMONE_VALUE)
-                self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(self.pheromones[min(v - 1, u - 1)][max(u - 1, v - 1)], MAX_PHEROMONE_VALUE)
-
-
             # Updates pheromones
-            self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] += PHEROMONE_DEPOSIT_CONSTANT/bestPath[1]
+            # if ONLY_DEPOSIT_PHEROMONES_WHEN_BETTER_THAN_GLOBAL_BEST:
+            self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] += PHEROMONE_DEPOSIT_CONSTANT * (MAX_PATH_LENGTH / 2) * (MAX_ROAD_LENGTH / 2)/bestPath[1]
+
+            # Limits the range of values of the pheromones:
+            self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] = max(
+                self.pheromones[min(v - 1, u - 1)][max(u - 1, v - 1)], MIN_PHEROMONE_VALUE)
+            self.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(
+                self.pheromones[min(v - 1, u - 1)][max(u - 1, v - 1)], MAX_PHEROMONE_VALUE)
 
         # print(f"Pheromone update time: {time.time() - start}")
+
         return bestPath
 
     def roundPheromones(self):

@@ -1,6 +1,5 @@
 import random
 import time
-import matplotlib.pyplot as plt
 
 from simulation import Simulation
 
@@ -13,10 +12,13 @@ if __name__ == '__main__':
     s.execute(500)
     print(f"Execution time: {time.time() - start}")
 
-# TODO add matplotlib data analysis (execution time, cost values of the routes
-# TODO Compare to shortest paths using dijkstra
+
+
+# TODO Add dijkstra to matplotlib
+# tODO fix MATPLOTLIB consnat replot & random slowdown at the end of simulation
 # TODO Test global pheromone avoidance and tune cost function variables (for edge selection)
 
+# TODO Maybe MAKE THE VEHICLES NOT BE AFFECTED BY THEIR OWN GLOBAL PHEROMONES (but rn it kinda acts as a push away from current path)
 # TODO add the ability to pheromone update the top 20% of paths
 # TODO possibly change the path for final output to be the best path over all iterations rather than the last path
 # TODO make duplicate vehicles, AKA, 1 vehicle represents 100 vehicles or something
