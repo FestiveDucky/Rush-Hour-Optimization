@@ -71,8 +71,8 @@ class Ant:
             globalPheromone = self.parent.simulation.globalTrafficDensity[min(path[-2] - 1, path[-1] - 1)][
                 max(path[-2] - 1, path[-1] - 1)]
             # Exponential traffic cost multiplier (1 + x^exp/n^exp)
-            if COST_BASED_ON_TRAFFIC_DENSITY:
-                score += roadLength * math.pow(globalPheromone, GLOBAL_PHEROMONE_EXPONENT) / math.pow(roadLength/MIN_ROAD_SPACE_PER_CAR, GLOBAL_PHEROMONE_EXPONENT)
+            if COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
+                score += roadLength * MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, GLOBAL_PHEROMONE_EXPONENT) / math.pow(roadLength/MIN_ROAD_SPACE_PER_CAR, GLOBAL_PHEROMONE_EXPONENT)
                 # assuming each car needs around 15 m of space -> around 10m of space will result in severe traffic
             else:
                 # Cost not based on traffic density
