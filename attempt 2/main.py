@@ -14,11 +14,14 @@ if __name__ == '__main__':
 
 # Utilized data/code outside of python: https://www.openstreetmap.org/#map=7/39.436/-79.958, matplotlib, lxml, numpy, heapdict, geopy
 
-# TODO Add export/import for graphs and the vehicle paths on the graphs (export best overall path)
 # TODO: Any time/memory improvements
 # TODO Store running average of past ~10 scores / differences among them and if they are close together ->
 #       - also increase decay rate over time/ decrease heuristic assistance
+# TODO debug/tune program
+# For abstract -> look at decrease in density of vehicles per any road
+
 # Increasing decay rates actually keeps ants on same path as it deletes all alternate paths and just keeps the current one
+# Adjust p to be higher than 80% as if your road is very long (80%) means that there is a very low probability of selecting every edge
 
 # TODO Maybe MAKE THE VEHICLES NOT BE AFFECTED BY THEIR OWN GLOBAL PHEROMONES (but rn it kinda acts as a push away from current path)
 # TODO add the ability to pheromone update the top 20% of paths

@@ -7,16 +7,16 @@ M_EDGES = 200
 PHEROMONE_DECAY_RATE = 0.9
 GLOBAL_PHEROMONE_DECAY_RATE = 0.5
 INITIAL_PHEROMONE_VALUE = 1. # need a decimal point after number
-INCOMPLETE_PENALTY = 10000
+INCOMPLETE_PENALTY = 1
 MAX_PATH_LENGTH = N_VERTICES
 MAX_ROAD_LENGTH = 1005
 MIN_ROAD_LENGTH = 1
-NUM_VEHICLES = 300
+NUM_VEHICLES = 1000
 PHEROMONE_DEPOSIT_CONSTANT = 0.1
-NUM_ANTS = 20 # per vehicle
+NUM_ANTS = 10 # per vehicle
 MIN_ROAD_SPACE_PER_CAR = 10 # distance between vehicles (includes vehicle length) at which point there is severe traffic
 
-p = 0.8 # probability cap for edge selection (only works for p > 0.5)
+p = 0.99 # probability cap for edge selection (only works for p > 0.5)
 MIN_PHEROMONE_VALUE = 0.01
 MAX_PHEROMONE_VALUE = 20
 
@@ -26,7 +26,7 @@ MAX_GLOBAL_PHEROMONE_MULTIPLIER = 3 # Maximum multiplier as a result of the glob
 
 # for weights during edge selection
 PHEROMONE_EXPONENT = 5 # Pheromone exponent
-HEURISTIC_EXPONENT = 2 # Heuristic exponent
+HEURISTIC_EXPONENT = 20 # Heuristic exponent
 GLOBAL_EXPONENT = 5 # traffic density exponent
 
 # the proportion of the  average score that the range of past 10 scores has to be below to enable automatic adaptation
@@ -34,17 +34,17 @@ PROPORTION_OF_TOTAL_SCORE_TO_ADAPT = 0.1
 MINIMUM_NUMBER_OF_SCORES_TO_ADAPT = 10
 
 # Only one of the following should be true (if both are false a random graph is generated
-LOAD_GRAPH_DATA = True
-IMPORT_GRAPH_DATA = False
+LOAD_GRAPH_DATA = False # Already precalculated city data
+IMPORT_GRAPH_DATA = False # Calculates new city data based on osm data
 
-PRINT_ALL_ITERATIONS = False # Whether we print the best paths & scores for the paths for every vehicle every iteration
+PRINT_ALL_ITERATIONS = True # Whether we print the best paths & scores for the paths for every vehicle every iteration
 EFFICIENT_DECAY_RATES = True
 EDGE_SELECTION_LIMITS = True # Sets a maximum probability for selecting an edge
 HEURISTIC_FUNCTION = True # Uses dijkstras algorithm as a heuristic
 COST_BASED_ON_TRAFFIC_DENSITY = True # AKA whether we use global pheromones
 USE_GLOBAL_PHEROMONE = True
 DECAY_GLOBAL_PHEROMONES = False # Determines whether we decay global pheromones or just set them to 0 every iteration
-AUTOMATIC_ADJUSTMENT_OF_CONSTANTS = True # when the current solutions become constant we adapt stuff like decay rate
+AUTOMATIC_ADJUSTMENT_OF_CONSTANTS = False # when the current solutions become constant we adapt stuff like decay rate
 
 # TODO BELOW vvv (these are not implemented yet)
 BEST_PATH_ONLY = True # use the best path to update pheromones or top 20%

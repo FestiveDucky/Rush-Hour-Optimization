@@ -7,7 +7,7 @@ import math
 import sys
 from graph import Graph
 import random
-from constants import *
+import constants
 from vehicle import Vehicle
 
 
@@ -22,19 +22,18 @@ class Simulation:
         self.destinations = set()
         # Generate vehicles
         self.vehicles = []
-        for i in range(NUM_VEHICLES):
+        for i in range(constants.NUM_VEHICLES):
             self.vehicles.append(
-                Vehicle(random.randint(1, N_VERTICES), random.randint(1, N_VERTICES), self.graph, self))
+                Vehicle(random.randint(1, constants.N_VERTICES), random.randint(1, constants.N_VERTICES), self.graph, self))
             self.destinations.add(self.vehicles[-1].end)
-
-        self.globalTrafficDensity = np.zeros((N_VERTICES, N_VERTICES))
+        self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
 
         # Precalculated dijkstra score
         self.baseScore = 0
 
         # key: destination, value: list of vertices and their distance from the end location
         self.heuristics = {}
-        if HEURISTIC_FUNCTION:
+        if constants.HEURISTIC_FUNCTION:
             self.dijkstra()
 
         self.scores = []
@@ -44,9 +43,9 @@ class Simulation:
         for destination in self.destinations:
             parents[destination] = {}
             unvisited = heapdict.heapdict()
-            distances = [float('inf') for x in range(N_VERTICES)]
+            distances = [float('inf') for x in range(constants.N_VERTICES)]
             # Set up infinite distances for all vertices
-            for i in range(1, N_VERTICES + 1):
+            for i in range(1, constants.N_VERTICES + 1):
                 if i != destination:
                     unvisited[i] = float('inf')
 
@@ -71,15 +70,15 @@ class Simulation:
 
             self.heuristics[destination] = distances
 
-        global NUM_VEHICLES
         # Double check that all the vehicles have valid paths and remove the invalid ones
-        for i in reversed(range(NUM_VEHICLES)):
+        for i in reversed(range(constants.NUM_VEHICLES)):
             if self.heuristics[self.vehicles[i].end][self.vehicles[i].start - 1] == float('inf') or self.vehicles[i].start == self.vehicles[i].end:
                 self.vehicles.pop(i)
-                NUM_VEHICLES -= 1
+                constants.NUM_VEHICLES -= 1
+                print("DELETED")
 
         # Add up global pheromones
-        for i in range(NUM_VEHICLES):
+        for i in range(constants.NUM_VEHICLES):
             v = self.vehicles[i].start
             u = parents[self.vehicles[i].end][v]
             while u != -1:
@@ -88,15 +87,15 @@ class Simulation:
                 u = parents[self.vehicles[i].end][v]
 
         # Calculate costs
-        for i in range(NUM_VEHICLES):
+        for i in range(constants.NUM_VEHICLES):
             v = self.vehicles[i].start
             u = parents[self.vehicles[i].end][v]
             while u != -1:
                 roadLength = self.graph.edgeWeight(u, v)
                 globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
-                if COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
-                    self.baseScore += roadLength * MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, GLOBAL_PHEROMONE_EXPONENT) / math.pow(
-                        roadLength / MIN_ROAD_SPACE_PER_CAR, GLOBAL_PHEROMONE_EXPONENT)
+                if constants.COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
+                    self.baseScore += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
+                        roadLength / constants.MIN_ROAD_SPACE_PER_CAR, constants.GLOBAL_PHEROMONE_EXPONENT)
                 else:
                     # Cost not based on traffic density
                     self.baseScore += roadLength
@@ -105,32 +104,31 @@ class Simulation:
                 u = parents[self.vehicles[i].end][v]
 
         # Reset global pheromones
-        self.globalTrafficDensity = np.zeros((N_VERTICES, N_VERTICES))
+        self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
 
 
     def generateGraph(self):
-        global N_VERTICES, M_EDGES
         self.graph = Graph()
 
-        if IMPORT_GRAPH_DATA:
+        if constants.IMPORT_GRAPH_DATA:
             self.graph.importData()
-            N_VERTICES = self.graph.n
-            M_EDGES = self.graph.m
+            constants.N_VERTICES = self.graph.n
+            constants.M_EDGES = self.graph.m
             return
 
-        if LOAD_GRAPH_DATA:
+        if constants.LOAD_GRAPH_DATA:
             self.graph.loadFromFile()
-            N_VERTICES = self.graph.n
-            M_EDGES = self.graph.m
+            constants.N_VERTICES = self.graph.n
+            constants.M_EDGES = self.graph.m
             return
 
         # Generates a random graph with random weights
-        for i in range(N_VERTICES):
+        for i in range(constants.N_VERTICES):
             self.graph.addVertex()
 
-        for i in range(M_EDGES):
-            self.graph.addEdge(random.randint(1, N_VERTICES), random.randint(1, N_VERTICES),
-                               random.random() * MAX_ROAD_LENGTH + MIN_ROAD_LENGTH)
+        for i in range(constants.M_EDGES):
+            self.graph.addEdge(random.randint(1, constants.N_VERTICES), random.randint(1, constants.N_VERTICES),
+                               random.random() * constants.MAX_ROAD_LENGTH + constants.MIN_ROAD_LENGTH)
 
     @staticmethod
     def iterate(v):
@@ -146,13 +144,13 @@ class Simulation:
 
     def execute(self, iterations):
         pool = None
-        if MULTIPROCESSING:
+        if constants.MULTIPROCESSING:
             pool = multiprocessing.Pool(processes=8)
 
         # bestPath = (None, math.inf)
         for i in range(iterations):
             # paths: (path, score)
-            if MULTIPROCESSING:
+            if constants.MULTIPROCESSING:
                 paths = list(pool.map(self.iterate, self.vehicles))
             else:
                 paths = []
@@ -160,20 +158,20 @@ class Simulation:
                     paths.append(vehicle.iterate())
 
             # Global pheromones
-            if DECAY_GLOBAL_PHEROMONES:
-                self.globalTrafficDensity *= GLOBAL_PHEROMONE_DECAY_RATE
+            if constants.DECAY_GLOBAL_PHEROMONES:
+                self.globalTrafficDensity *= constants.GLOBAL_PHEROMONE_DECAY_RATE
             else:
-                self.globalTrafficDensity = np.zeros((N_VERTICES, N_VERTICES))
+                self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
 
             for path in paths:
                 for j in range(1, len(path[0])):
                     v = path[0][j - 1]
                     u = path[0][j]
                     self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
-                    self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(NUM_VEHICLES, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
+                    self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(constants.NUM_VEHICLES, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
 
 
-            if not PRINT_ALL_ITERATIONS:
+            if not constants.PRINT_ALL_ITERATIONS:
                 sys.stdout.write(f"\rCompleted: {100 * (i + 1) / iterations}%")
                 sys.stdout.flush()
 
@@ -187,46 +185,49 @@ class Simulation:
 
                     roadLength = self.graph.edgeWeight(u, v)
                     globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
-                    if COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
-                        total += roadLength * MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, GLOBAL_PHEROMONE_EXPONENT) / math.pow(
-                            roadLength / MIN_ROAD_SPACE_PER_CAR, GLOBAL_PHEROMONE_EXPONENT)
+                    if constants.COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
+                        total += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
+                            roadLength / constants.MIN_ROAD_SPACE_PER_CAR, constants.GLOBAL_PHEROMONE_EXPONENT)
                     else:
                         # Cost not based on traffic density
                         total += roadLength
-                if PRINT_ALL_ITERATIONS or i == iterations - 1:
+
+                if len(path[0]) == 0:
+                    total += constants.INCOMPLETE_PENALTY
+
+                if constants.PRINT_ALL_ITERATIONS or i == iterations - 1:
                     print(f"Iter: {i}, score: {path[1]}, path: {path[0]}, cummulative score: {total}")
 
             self.scores.append(total)
             self.plot()
 
-            if AUTOMATIC_ADJUSTMENT_OF_CONSTANTS and len(self.scores) >= MINIMUM_NUMBER_OF_SCORES_TO_ADAPT:
+            if constants.AUTOMATIC_ADJUSTMENT_OF_CONSTANTS and len(self.scores) >= constants.MINIMUM_NUMBER_OF_SCORES_TO_ADAPT:
                 # Check if the past 10 scores are ~ the same
                 maxScore = -1
                 minScore = float('inf')
                 averageScore = 0
 
-                for j in range(len(self.scores) - MINIMUM_NUMBER_OF_SCORES_TO_ADAPT, len(self.scores)):
+                for j in range(len(self.scores) - constants.MINIMUM_NUMBER_OF_SCORES_TO_ADAPT, len(self.scores)):
                     maxScore = max(maxScore, self.scores[j])
                     minScore = min(minScore, self.scores[j])
                     averageScore += self.scores[j]
 
-                averageScore /= MINIMUM_NUMBER_OF_SCORES_TO_ADAPT
+                averageScore /= constants.MINIMUM_NUMBER_OF_SCORES_TO_ADAPT
                 scoreRange = maxScore - minScore
 
                 # If they are then we enable automatic adaptation
-                if scoreRange <= PROPORTION_OF_TOTAL_SCORE_TO_ADAPT * averageScore:
+                if scoreRange <= constants.PROPORTION_OF_TOTAL_SCORE_TO_ADAPT * averageScore:
                     print(f"Enabled automatic adaptation on iteration {i}")
-                    global PHEROMONE_DECAY_RATE, HEURISTIC_EXPONENT, PHEROMONE_EXPONENT, p
-                    PHEROMONE_DECAY_RATE = 1
-                    HEURISTIC_EXPONENT = 0
-                    PHEROMONE_EXPONENT = 0
-                    p = 0.6
+                    constants.PHEROMONE_DECAY_RATE = 1
+                    constants.HEURISTIC_EXPONENT = 0
+                    constants.PHEROMONE_EXPONENT = 0
+                    constants.p = 0.6
                     # PHEROMONE_DECAY_RATE -= 0.05
                     # HEURISTIC_EXPONENT = 0
                     # p -= 0.05
                 # else:
                 #     PHEROMONE_DECAY_RATE += 0.05
                 #     p += 0.05
-                print(f"Iteration: {i}, p: {p}, decay rate: {PHEROMONE_DECAY_RATE}")
+                print(f"Iteration: {i}, p: {constants.p}, decay rate: {constants.PHEROMONE_DECAY_RATE}")
         # Permanently show the graph at the end of the simulation
         plt.show()
