@@ -12,10 +12,13 @@ if __name__ == '__main__':
     s.execute(500)
     print(f"Execution time: {time.time() - start}")
 
+# Utilized data/code outside of python: https://www.openstreetmap.org/#map=7/39.436/-79.958, matplotlib, lxml, numpy, heapdict, geopy
+
 # TODO Add export/import for graphs and the vehicle paths on the graphs (export best overall path)
 # TODO: Any time/memory improvements
-# TODO Add something which stores best paths for each vehicle and does new pheromone deposits based on comparison to that
+# TODO Store running average of past ~10 scores / differences among them and if they are close together ->
 #       - also increase decay rate over time/ decrease heuristic assistance
+# Increasing decay rates actually keeps ants on same path as it deletes all alternate paths and just keeps the current one
 
 # TODO Maybe MAKE THE VEHICLES NOT BE AFFECTED BY THEIR OWN GLOBAL PHEROMONES (but rn it kinda acts as a push away from current path)
 # TODO add the ability to pheromone update the top 20% of paths
@@ -28,5 +31,3 @@ if __name__ == '__main__':
 # Above might not be needed as the decay rate already spreads it out
 
 # TODO EXTRA: Any time/memory improvements
-# TODO EXTRA: Have increasing pheromone decay rates to further increase exploration
-

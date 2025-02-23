@@ -1,7 +1,6 @@
 import time
 import multiprocessing
 import matplotlib.pyplot as plt
-import pandas as pd
 import heapdict
 import numpy as np
 import math
@@ -110,8 +109,22 @@ class Simulation:
 
 
     def generateGraph(self):
-        # Generates a random graph with random weights
+        global N_VERTICES, M_EDGES
         self.graph = Graph()
+
+        if IMPORT_GRAPH_DATA:
+            self.graph.importData()
+            N_VERTICES = self.graph.n
+            M_EDGES = self.graph.m
+            return
+
+        if LOAD_GRAPH_DATA:
+            self.graph.loadFromFile()
+            N_VERTICES = self.graph.n
+            M_EDGES = self.graph.m
+            return
+
+        # Generates a random graph with random weights
         for i in range(N_VERTICES):
             self.graph.addVertex()
 
@@ -185,5 +198,35 @@ class Simulation:
 
             self.scores.append(total)
             self.plot()
+
+            if AUTOMATIC_ADJUSTMENT_OF_CONSTANTS and len(self.scores) >= MINIMUM_NUMBER_OF_SCORES_TO_ADAPT:
+                # Check if the past 10 scores are ~ the same
+                maxScore = -1
+                minScore = float('inf')
+                averageScore = 0
+
+                for j in range(len(self.scores) - MINIMUM_NUMBER_OF_SCORES_TO_ADAPT, len(self.scores)):
+                    maxScore = max(maxScore, self.scores[j])
+                    minScore = min(minScore, self.scores[j])
+                    averageScore += self.scores[j]
+
+                averageScore /= MINIMUM_NUMBER_OF_SCORES_TO_ADAPT
+                scoreRange = maxScore - minScore
+
+                # If they are then we enable automatic adaptation
+                if scoreRange <= PROPORTION_OF_TOTAL_SCORE_TO_ADAPT * averageScore:
+                    print(f"Enabled automatic adaptation on iteration {i}")
+                    global PHEROMONE_DECAY_RATE, HEURISTIC_EXPONENT, PHEROMONE_EXPONENT, p
+                    PHEROMONE_DECAY_RATE = 1
+                    HEURISTIC_EXPONENT = 0
+                    PHEROMONE_EXPONENT = 0
+                    p = 0.6
+                    # PHEROMONE_DECAY_RATE -= 0.05
+                    # HEURISTIC_EXPONENT = 0
+                    # p -= 0.05
+                # else:
+                #     PHEROMONE_DECAY_RATE += 0.05
+                #     p += 0.05
+                print(f"Iteration: {i}, p: {p}, decay rate: {PHEROMONE_DECAY_RATE}")
         # Permanently show the graph at the end of the simulation
         plt.show()

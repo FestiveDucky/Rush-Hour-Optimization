@@ -49,8 +49,6 @@ class Ant:
                         # Global pheromone
                         weight *= math.pow(2 - self.parent.simulation.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] / NUM_VEHICLES, GLOBAL_EXPONENT)
 
-                    # print(f"WEIGHT: {weight}, Length {self.parent.graph.edgeWeight(v, u)}, Pheromone {self.parent.pheromones[min(u - 1, v - 1)][max(u - 1, v - 1)]}, Heuristic {(self.parent.simulation.heuristics[self.parent.end][v - 1] - self.parent.simulation.heuristics[self.parent.end][u - 1])}, Global {self.parent.simulation.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]}")
-
                     weights.append(weight)
                     largestWeight = max(weights[-1], largestWeight)
                     cumulativeTotal += weights[-1]
