@@ -15,10 +15,17 @@ if __name__ == '__main__':
 # Utilized data/code outside of python: https://www.openstreetmap.org/#map=7/39.436/-79.958, matplotlib, lxml, numpy, heapdict, geopy
 
 # TODO: Any time/memory improvements
-# TODO Store running average of past ~10 scores / differences among them and if they are close together ->
-#       - also increase decay rate over time/ decrease heuristic assistance
+# TODO fix graph from osm being mostly split apart (try new york city / newark)
+# possibly fix matplotlib delayed graphing
 # TODO debug/tune program
-# For abstract -> look at decrease in density of vehicles per any road
+# TODO look at decrease in density of vehicles per any road (1.4x / -30% improvment)
+# TODO have heuristic be phased out and only add pheromones to previous best path until we find a new best path which we also add pheromones to (maybe also just add pheromones based on what percentage better the current path is from our best ever path)
+
+# TODO LATER
+# TODO ( Decrease pheromones on trails that result in us looping back on ourselves -> set pheromone to min pheromone amount)
+# TODO ADAPTABILITY Store running average of past ~10 scores / differences among them and if they are close together ->
+#       - also increase decay rate over time/ decrease heuristic assistance
+# TODO make the algorithm prefer better solutions and to try and stay on them
 
 # Increasing decay rates actually keeps ants on same path as it deletes all alternate paths and just keeps the current one
 # Adjust p to be higher than 80% as if your road is very long (80%) means that there is a very low probability of selecting every edge
@@ -34,3 +41,5 @@ if __name__ == '__main__':
 # Above might not be needed as the decay rate already spreads it out
 
 # TODO EXTRA: Any time/memory improvements
+# 158885.52607098
+# 274393.73139896

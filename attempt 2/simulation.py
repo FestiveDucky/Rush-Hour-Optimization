@@ -71,11 +71,13 @@ class Simulation:
             self.heuristics[destination] = distances
 
         # Double check that all the vehicles have valid paths and remove the invalid ones
+        deletedCount = 0
         for i in reversed(range(constants.NUM_VEHICLES)):
             if self.heuristics[self.vehicles[i].end][self.vehicles[i].start - 1] == float('inf') or self.vehicles[i].start == self.vehicles[i].end:
                 self.vehicles.pop(i)
                 constants.NUM_VEHICLES -= 1
-                print("DELETED")
+                deletedCount += 1
+        print(f"Deleted {deletedCount} vehicles!")
 
         # Add up global pheromones
         for i in range(constants.NUM_VEHICLES):
@@ -90,6 +92,8 @@ class Simulation:
         for i in range(constants.NUM_VEHICLES):
             v = self.vehicles[i].start
             u = parents[self.vehicles[i].end][v]
+
+            path = [v, u]
             while u != -1:
                 roadLength = self.graph.edgeWeight(u, v)
                 globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
@@ -102,6 +106,11 @@ class Simulation:
 
                 v = u
                 u = parents[self.vehicles[i].end][v]
+
+                if constants.PRINT_DIJKSTRA_PATHS:
+                    path.append(u)
+            if constants.PRINT_DIJKSTRA_PATHS:
+                print(f"PATH: {path}, score {self.baseScore}")
 
         # Reset global pheromones
         self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
@@ -158,8 +167,11 @@ class Simulation:
                     paths.append(vehicle.iterate())
 
             # Global pheromones
+            temp = None
             if constants.DECAY_GLOBAL_PHEROMONES:
                 self.globalTrafficDensity *= constants.GLOBAL_PHEROMONE_DECAY_RATE
+                temp = self.globalTrafficDensity.copy()
+                self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
             else:
                 self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
 
@@ -169,7 +181,9 @@ class Simulation:
                     u = path[0][j]
                     self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
                     self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(constants.NUM_VEHICLES, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
-
+                    if constants.DECAY_GLOBAL_PHEROMONES:
+                        temp[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
+                        temp[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(constants.NUM_VEHICLES, temp[min(u - 1, v - 1)][max(u - 1, v - 1)])
 
             if not constants.PRINT_ALL_ITERATIONS:
                 sys.stdout.write(f"\rCompleted: {100 * (i + 1) / iterations}%")
@@ -196,10 +210,14 @@ class Simulation:
                     total += constants.INCOMPLETE_PENALTY
 
                 if constants.PRINT_ALL_ITERATIONS or i == iterations - 1:
-                    print(f"Iter: {i}, score: {path[1]}, path: {path[0]}, cummulative score: {total}")
+                    print(f"Iter: {i}, score: {path[1]}, path: {path[0]}, cumulative score: {total}")
+            if constants.DECAY_GLOBAL_PHEROMONES:
+                self.globalTrafficDensity = temp.copy()
 
             self.scores.append(total)
             self.plot()
+
+
 
             if constants.AUTOMATIC_ADJUSTMENT_OF_CONSTANTS and len(self.scores) >= constants.MINIMUM_NUMBER_OF_SCORES_TO_ADAPT:
                 # Check if the past 10 scores are ~ the same
@@ -218,16 +236,15 @@ class Simulation:
                 # If they are then we enable automatic adaptation
                 if scoreRange <= constants.PROPORTION_OF_TOTAL_SCORE_TO_ADAPT * averageScore:
                     print(f"Enabled automatic adaptation on iteration {i}")
-                    constants.PHEROMONE_DECAY_RATE = 1
-                    constants.HEURISTIC_EXPONENT = 0
-                    constants.PHEROMONE_EXPONENT = 0
-                    constants.p = 0.6
-                    # PHEROMONE_DECAY_RATE -= 0.05
-                    # HEURISTIC_EXPONENT = 0
-                    # p -= 0.05
+                    # constants.PHEROMONE_DECAY_RATE = 0.8
+                    constants.HEURISTIC_EXPONENT = 1
+                    constants.PHEROMONE_EXPONENT = 5
+                    # constants.GLOBAL_EXPONENT = 50
+                    # constants.p = 0.6
                 # else:
-                #     PHEROMONE_DECAY_RATE += 0.05
-                #     p += 0.05
+                #     constants.PHEROMONE_DECAY_RATE = 0.85
+                #     constants.PHEROMONE_EXPONENT = 50
+                #     constants.p = 0.99
                 print(f"Iteration: {i}, p: {constants.p}, decay rate: {constants.PHEROMONE_DECAY_RATE}")
         # Permanently show the graph at the end of the simulation
         plt.show()

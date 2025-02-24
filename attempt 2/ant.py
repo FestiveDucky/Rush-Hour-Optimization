@@ -16,15 +16,18 @@ class Ant:
         path = [self.parent.start]
         visited = np.zeros(constants.N_VERTICES)
         score = 0
+        alreadyVisited = False
         while path[-1] != self.parent.end and len(path) < constants.MAX_PATH_LENGTH:
             neighbors = self.parent.graph.neighbors(path[-1])
             weights = []
             largestWeight = 0
             cumulativeTotal = 0
+            skippedCuzVisited = 0
             for neighbor in neighbors:
                 # Makes the ant never go along same path
                 if visited[neighbor-1]:
                     weights.append(0)
+                    skippedCuzVisited += 1
                 # If the vertex is banned we also skip it
                 elif self.parent.bannedVertices[neighbor-1]:
                     weights.append(0)
@@ -65,6 +68,9 @@ class Ant:
 
             # If there is nowhere to go we just stop
             if cumulativeTotal == 0:
+                # Greater than 1 because we will always skip the vertex we just came from
+                if skippedCuzVisited > 1:
+                    alreadyVisited = True
                 # print("BROKE", path[-1], neighbors, self.vertexFromLastIntersection)
                 break
 
@@ -98,7 +104,7 @@ class Ant:
             score *= -1
 
             # Assume that we hit a dead end
-            if len(path) != constants.MAX_PATH_LENGTH:
+            if len(path) != constants.MAX_PATH_LENGTH and not alreadyVisited:
                 # print("BANNING", self.vertexFromLastIntersection)
                 self.parent.bannedVertices[self.vertexFromLastIntersection - 1] = 1
 

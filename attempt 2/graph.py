@@ -54,7 +54,8 @@ class Graph:
 
             isRoad = False
             for child in data[i]:
-                allowedRoads = ["motorway","trunk", "primary", "secondary", "tertiary", "unclassified", "residential", "service", "living_street", "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link"]
+                # remove "service" which are driveways
+                allowedRoads = ["motorway","trunk", "primary", "secondary", "tertiary", "unclassified", "residential", "living_street", "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link"]
                 if child.tag == "tag" and child.get("k") == "highway" and child.get("v") in allowedRoads:
                     isRoad = True
                     break
