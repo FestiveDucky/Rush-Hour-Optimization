@@ -18,16 +18,19 @@ class Simulation:
 
         # Generate random graph
         self.generateGraph()
+        print(constants.N_VERTICES, constants.M_EDGES)
 
         self.bestSolution = {}
         self.bestSolutionScore = float('inf')
 
         self.destinations = set()
         # Generate vehicles
+        destination = random.randint(1, constants.N_VERTICES)
         self.vehicles = []
         for i in range(constants.NUM_VEHICLES):
-            self.vehicles.append(
-                Vehicle(random.randint(1, constants.N_VERTICES), random.randint(1, constants.N_VERTICES), self.graph, self, i))
+            if not constants.SAME_DESTINATION:
+                destination = random.randint(1, constants.N_VERTICES)
+            self.vehicles.append(Vehicle(random.randint(1, constants.N_VERTICES), destination, self.graph, self, i))
             self.bestSolution[i] = (None, float('inf'))
             self.destinations.add(self.vehicles[-1].end)
         self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
@@ -127,13 +130,14 @@ class Simulation:
             self.graph.importData()
             constants.N_VERTICES = self.graph.n
             constants.M_EDGES = self.graph.m
-            print("--------------------------------------FINISHED--------------------------------------------------")
+            # print("--------------------------------------FINISHED--------------------------------------------------")
             return
 
         if constants.LOAD_GRAPH_DATA:
             self.graph.loadFromFile()
             constants.N_VERTICES = self.graph.n
             constants.M_EDGES = self.graph.m
+            # print("--------------------------------------FINISHED--------------------------------------------------")
             return
 
         # Generates a random graph with random weights
@@ -222,7 +226,7 @@ class Simulation:
 
             if constants.PRINT_ALL_ITERATIONS or i == iterations - 1:
                 # score: {path[1]}, path: {path[0]},
-                print(f"Iter: {i}, dijkstra: {self.baseScore}, global best: {self.bestSolutionScore}, cumulative score: {total}")
+                print(f"Iter: {i}, dijkstra: {self.baseScore:,}, global best: {self.bestSolutionScore:,}, cumulative score: {total:,}")
 
             # Update best solution over all time
             if total < self.bestSolutionScore:

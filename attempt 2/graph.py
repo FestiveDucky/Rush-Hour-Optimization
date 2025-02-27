@@ -2,6 +2,7 @@ import geopy.distance
 from lxml import etree
 from pathlib import Path
 
+
 # Undirected weighted graph
 class Graph:
     def __init__(self):
@@ -17,7 +18,10 @@ class Graph:
     def addEdge(self, u, v, w):
         if u == v:
             return
-        self.m += 1
+
+        if self.adjList[v].get(u) is None:
+            self.m += 1
+
         self.adjList[u][v] = w
         self.adjList[v][u] = w
 
@@ -37,7 +41,6 @@ class Graph:
 
     def importData(self):
         data = etree.parse('map.osm').getroot()
-        print("FINISHED LOADING")
         # def prettyprint(element, **kwargs):
         #     xml = etree.tostring(element, pretty_print=True, **kwargs)
         #     print(xml.decode(), end='')
@@ -56,8 +59,7 @@ class Graph:
             isRoad = False
             for child in data[i]:
                 # remove "service" which are driveways
-                allowedRoads = ["motorway","trunk", "primary", "secondary", "tertiary", "unclassified", "residential", "living_street", "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link"]
-                print(child.get("v"))
+                allowedRoads = ["service", "motorway","trunk", "primary", "secondary", "tertiary", "unclassified", "residential", "living_street", "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link"]
                 if child.tag == "tag" and child.get("k") == "highway" and child.get("v") in allowedRoads:
                     isRoad = True
                     break
@@ -71,12 +73,9 @@ class Graph:
                     curNode = child.get("ref")
                     if prevNode is not None:
                         d = geopy.distance.geodesic(coords[prevNode], coords[curNode]).m
-                        self.m += 1
-                        self.adjList[prevNode][curNode] = d
-                        self.adjList[curNode][prevNode] = d
+                        self.addEdge(prevNode, curNode, d)
                     prevNode = curNode
             i += 1
-        print(f"Edges {self.m} Nodes {self.n}")
 
         # Remove redundant edges
         toRemove = []
@@ -87,10 +86,10 @@ class Graph:
                 self.adjList[n1].pop(v)
                 self.adjList[n2].pop(v)
                 d = neighbors[n1] + neighbors[n2]
-                self.adjList[n1][n2] = d
-                self.adjList[n2][n1] = d
+                # Right now for parallel edges we just take the most recent distance (not the shortest)
+                self.addEdge(n1, n2, d)
                 toRemove.append(v)
-                self.m -= 1
+                self.m -= 2
             elif len(neighbors) == 0:
                 toRemove.append(v)
 
@@ -111,12 +110,17 @@ class Graph:
 
         self.adjList = newAdjList
 
+        # 1101
         self.writeToFile()
 
     def writeToFile(self):
         with open("graph.txt", 'w') as fout:
             fout.write(f"{self.n} {self.m}\n")
-            fout.write(str(self))
+
+            for v, weights in self.adjList.items():
+                for u, w in weights.items():
+                    fout.write(f"{v} {u} {w}\n")
+            # fout.write(str(self))
 
     def loadFromFile(self):
         with open("graph.txt", "r") as fin:
@@ -126,7 +130,7 @@ class Graph:
                 self.addVertex()
 
             # print(self.adjList.items())
-            for i in range(int(m)):
+            for i in range(int(m) * 2):
                 u, v, w = fin.readline().split(" ")
                 self.addEdge(int(u), int(v), float(w))
 
