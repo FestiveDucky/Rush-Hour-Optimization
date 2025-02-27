@@ -19,12 +19,16 @@ class Simulation:
         # Generate random graph
         self.generateGraph()
 
+        self.bestSolution = {}
+        self.bestSolutionScore = float('inf')
+
         self.destinations = set()
         # Generate vehicles
         self.vehicles = []
         for i in range(constants.NUM_VEHICLES):
             self.vehicles.append(
-                Vehicle(random.randint(1, constants.N_VERTICES), random.randint(1, constants.N_VERTICES), self.graph, self))
+                Vehicle(random.randint(1, constants.N_VERTICES), random.randint(1, constants.N_VERTICES), self.graph, self, i))
+            self.bestSolution[i] = (None, float('inf'))
             self.destinations.add(self.vehicles[-1].end)
         self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
 
@@ -123,6 +127,7 @@ class Simulation:
             self.graph.importData()
             constants.N_VERTICES = self.graph.n
             constants.M_EDGES = self.graph.m
+            print("--------------------------------------FINISHED--------------------------------------------------")
             return
 
         if constants.LOAD_GRAPH_DATA:
@@ -158,7 +163,7 @@ class Simulation:
 
         # bestPath = (None, math.inf)
         for i in range(iterations):
-            # paths: (path, score)
+            # paths: (path, score, vehicle id)
             if constants.MULTIPROCESSING:
                 paths = list(pool.map(self.iterate, self.vehicles))
             else:
@@ -189,10 +194,13 @@ class Simulation:
                 sys.stdout.write(f"\rCompleted: {100 * (i + 1) / iterations}%")
                 sys.stdout.flush()
 
+
+            currentSolution = {}
             total = 0
             # Final analysis
             for path in paths:
                 # COST FUNCTION NEEDED BECAUSE DURING EXECUTION GLOBAL PHEROMONES ARE NOT UPDATED
+                pathScore = 0
                 for j in range(1, len(path[0])):
                     v = path[0][j - 1]
                     u = path[0][j]
@@ -200,17 +208,27 @@ class Simulation:
                     roadLength = self.graph.edgeWeight(u, v)
                     globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
                     if constants.COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
-                        total += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
+                        pathScore += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
                             roadLength / constants.MIN_ROAD_SPACE_PER_CAR, constants.GLOBAL_PHEROMONE_EXPONENT)
                     else:
                         # Cost not based on traffic density
-                        total += roadLength
+                        pathScore += roadLength
 
                 if len(path[0]) == 0:
-                    total += constants.INCOMPLETE_PENALTY
+                    pathScore += constants.INCOMPLETE_PENALTY
 
-                if constants.PRINT_ALL_ITERATIONS or i == iterations - 1:
-                    print(f"Iter: {i}, score: {path[1]}, path: {path[0]}, cumulative score: {total}")
+                total += pathScore
+                currentSolution[path[2]] = (path[0], pathScore)
+
+            if constants.PRINT_ALL_ITERATIONS or i == iterations - 1:
+                # score: {path[1]}, path: {path[0]},
+                print(f"Iter: {i}, dijkstra: {self.baseScore}, global best: {self.bestSolutionScore}, cumulative score: {total}")
+
+            # Update best solution over all time
+            if total < self.bestSolutionScore:
+                self.bestSolutionScore = total
+                self.bestSolution = currentSolution.copy()
+
             if constants.DECAY_GLOBAL_PHEROMONES:
                 self.globalTrafficDensity = temp.copy()
 

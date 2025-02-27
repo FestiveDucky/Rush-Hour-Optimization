@@ -1,32 +1,33 @@
-# N_VERTICES = 100
-# M_EDGES = 160
-
-N_VERTICES = 100
-M_EDGES = 200
+SCALE = 1
+N_VERTICES = 100 * SCALE
+M_EDGES = 200 * SCALE
 
 PHEROMONE_DECAY_RATE = 0.9
 GLOBAL_PHEROMONE_DECAY_RATE = 0.7
 INITIAL_PHEROMONE_VALUE = 1. # need a decimal point after number
-INCOMPLETE_PENALTY = 1e4
+INCOMPLETE_PENALTY = 1e6
 MAX_PATH_LENGTH = N_VERTICES
 MAX_ROAD_LENGTH = 1005
 MIN_ROAD_LENGTH = 1
 NUM_VEHICLES = 200
-PHEROMONE_DEPOSIT_CONSTANT = 0.1
-NUM_ANTS = 100 # per vehicle
+PHEROMONE_DEPOSIT_CONSTANT = 1
+NUM_ANTS = 10 # per vehicle
 MIN_ROAD_SPACE_PER_CAR = 10 # distance between vehicles (includes vehicle length) at which point there is severe traffic
 
-p = 0.8 # probability cap for edge selection (only works for p > 0.5)
+p = 0.95 # probability cap for edge selection (only works for p > 0.5)
 MIN_PHEROMONE_VALUE = 0.01
 MAX_PHEROMONE_VALUE = 20
+MAX_PHEROMONE_FOR_GLOBAL_BEST_PATH = 5
+# PHEROMONE_DEPOSIT_FOR_GLOBAL_BEST_PATH =
 
 # for cost function (closer to 0 -> greater punishment for smaller number of vehicles)
 GLOBAL_PHEROMONE_EXPONENT = 0.7
 MAX_GLOBAL_PHEROMONE_MULTIPLIER = 3 # Maximum multiplier as a result of the global traffic
 
 # for weights during edge selection
-PHEROMONE_EXPONENT = 1 # Pheromone exponent
-HEURISTIC_EXPONENT = 3 # Heuristic exponent
+PHEROMONE_EXPONENT = 5 # Pheromone exponent
+HEURISTIC_EXPONENT = 7 # Heuristic exponent
+# NOTE: low ants need high heuristic exponent
 GLOBAL_EXPONENT = 5 # traffic density exponent
 
 # the proportion of the  average score that the range of past 10 scores has to be below to enable automatic adaptation
@@ -35,9 +36,10 @@ MINIMUM_NUMBER_OF_SCORES_TO_ADAPT = 8
 
 # Only one of the following should be true (if both are false a random graph is generated
 LOAD_GRAPH_DATA = False # Already precalculated city data
-IMPORT_GRAPH_DATA = False # Calculates new city data based on osm data
+IMPORT_GRAPH_DATA = True # Calculates new city data based on osm data
 
-PRINT_DIJKSTRA_PATHS = True
+DEPOSIT_PHEROMONES_ON_GLOBAL_BEST = True # Whether we deposit extra pheromones along the global best solution ever
+PRINT_DIJKSTRA_PATHS = False # whether we print the paths found by dijkstra
 PRINT_ALL_ITERATIONS = True # Whether we print the best paths & scores for the paths for every vehicle every iteration
 EFFICIENT_DECAY_RATES = True
 EDGE_SELECTION_LIMITS = True # Sets a maximum probability for selecting an edge
@@ -45,12 +47,10 @@ HEURISTIC_FUNCTION = True # Uses dijkstras algorithm as a heuristic
 COST_BASED_ON_TRAFFIC_DENSITY = True # AKA whether we use global pheromones
 USE_GLOBAL_PHEROMONE = True
 DECAY_GLOBAL_PHEROMONES = True # Determines whether we decay global pheromones or just set them to 0 every iteration
-AUTOMATIC_ADJUSTMENT_OF_CONSTANTS = True # when the current solutions become constant we adapt stuff like decay rate
+AUTOMATIC_ADJUSTMENT_OF_CONSTANTS = False # when the current solutions become constant we adapt stuff like decay rate
 
 # TODO BELOW vvv (these are not implemented yet)
-BEST_PATH_ONLY = True # use the best path to update pheromones or top 20%
-
-
+BEST_PATH_ONLY = True # use the best path to update pheromones or top 20% of paths
 # TODO fix the following
 MULTIPROCESSING = False # don't work rn -> none of data is saved after multiprocessing + slower than normal
 

@@ -108,6 +108,6 @@ class Ant:
                 # print("BANNING", self.vertexFromLastIntersection)
                 self.parent.bannedVertices[self.vertexFromLastIntersection - 1] = 1
 
-        return path, score
+        return path, score, self.parent.id
 
 

@@ -37,6 +37,7 @@ class Graph:
 
     def importData(self):
         data = etree.parse('map.osm').getroot()
+        print("FINISHED LOADING")
         # def prettyprint(element, **kwargs):
         #     xml = etree.tostring(element, pretty_print=True, **kwargs)
         #     print(xml.decode(), end='')
@@ -56,6 +57,7 @@ class Graph:
             for child in data[i]:
                 # remove "service" which are driveways
                 allowedRoads = ["motorway","trunk", "primary", "secondary", "tertiary", "unclassified", "residential", "living_street", "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link"]
+                print(child.get("v"))
                 if child.tag == "tag" and child.get("k") == "highway" and child.get("v") in allowedRoads:
                     isRoad = True
                     break
@@ -74,6 +76,7 @@ class Graph:
                         self.adjList[curNode][prevNode] = d
                     prevNode = curNode
             i += 1
+        print(f"Edges {self.m} Nodes {self.n}")
 
         # Remove redundant edges
         toRemove = []

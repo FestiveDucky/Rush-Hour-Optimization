@@ -14,12 +14,20 @@ if __name__ == '__main__':
 
 # Utilized data/code outside of python: https://www.openstreetmap.org/#map=7/39.436/-79.958, matplotlib, lxml, numpy, heapdict, geopy
 
-# TODO: Any time/memory improvements
+
 # TODO fix graph from osm being mostly split apart (try new york city / newark)
-# possibly fix matplotlib delayed graphing
-# TODO debug/tune program
+
+# TODO change deposit of pheromones based on current path score to be somewhat related to best global path score
+#       - (MAYBE NOT) add adaptable MAX_PHEROMONE_FOR_GLOBAL_BEST_PATH -> gets larger for when we deviate upward -> smaller when we get closer
+#       - Store how long it have been since previous improvment -> change variab;es based on this and diff between current sol and prev sol
+#       - lots of failed to reach destination -> increase heuristic
 # TODO look at decrease in density of vehicles per any road (1.4x / -30% improvment)
-# TODO have heuristic be phased out and only add pheromones to previous best path until we find a new best path which we also add pheromones to (maybe also just add pheromones based on what percentage better the current path is from our best ever path)
+# possibly fix matplotlib delayed graphing
+# Figure out why code gets slower over time (graphing?)
+# TODO: Any time/memory improvements
+# TODO debug/tune program
+
+
 
 # TODO LATER
 # TODO ( Decrease pheromones on trails that result in us looping back on ourselves -> set pheromone to min pheromone amount)
