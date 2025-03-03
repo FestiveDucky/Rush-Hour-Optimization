@@ -22,6 +22,8 @@ class Simulation:
 
         self.bestSolution = {}
         self.bestSolutionScore = float('inf')
+        self.bestSolutionWorstTrafficDensity = 0
+        self.bestSolutionAverageTrafficDensity = 0
 
         self.destinations = set()
         # Generate vehicles
@@ -37,6 +39,8 @@ class Simulation:
 
         # Precalculated dijkstra score
         self.baseScore = 0
+        self.baseWorstTrafficDensity = 0
+        self.baseAverageTrafficDensity = 0
 
         # key: destination, value: list of vertices and their distance from the end location
         self.heuristics = {}
@@ -86,14 +90,19 @@ class Simulation:
                 deletedCount += 1
         print(f"Deleted {deletedCount} vehicles!")
 
+        visited = set()
         # Add up global pheromones
         for i in range(constants.NUM_VEHICLES):
             v = self.vehicles[i].start
             u = parents[self.vehicles[i].end][v]
+            visited.add((min(u, v), max(u, v)))
             while u != -1:
                 self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
+                self.baseWorstTrafficDensity = max(self.baseWorstTrafficDensity, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
                 v = u
                 u = parents[self.vehicles[i].end][v]
+
+        self.baseAverageTrafficDensity = constants.NUM_VEHICLES / len(visited)
 
         # Calculate costs
         for i in range(constants.NUM_VEHICLES):
@@ -184,12 +193,18 @@ class Simulation:
             else:
                 self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
 
+            worstTrafficDensity = 0
+            visited = set()
+
             for path in paths:
                 for j in range(1, len(path[0])):
                     v = path[0][j - 1]
                     u = path[0][j]
+                    visited.add((min(u, v), max(u, v)))
                     self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
                     self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(constants.NUM_VEHICLES, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
+
+                    worstTrafficDensity = max(worstTrafficDensity, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
                     if constants.DECAY_GLOBAL_PHEROMONES:
                         temp[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
                         temp[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(constants.NUM_VEHICLES, temp[min(u - 1, v - 1)][max(u - 1, v - 1)])
@@ -224,14 +239,16 @@ class Simulation:
                 total += pathScore
                 currentSolution[path[2]] = (path[0], pathScore)
 
-            if constants.PRINT_ALL_ITERATIONS or i == iterations - 1:
-                # score: {path[1]}, path: {path[0]},
-                print(f"Iter: {i}, dijkstra: {self.baseScore:,}, global best: {self.bestSolutionScore:,}, cumulative score: {total:,}")
-
             # Update best solution over all time
             if total < self.bestSolutionScore:
                 self.bestSolutionScore = total
                 self.bestSolution = currentSolution.copy()
+                self.bestSolutionAverageTrafficDensity = constants.NUM_VEHICLES/len(visited)
+                self.bestSolutionWorstTrafficDensity = worstTrafficDensity
+
+            if constants.PRINT_ALL_ITERATIONS or i == iterations - 1:
+                # score: {path[1]}, path: {path[0]},
+                print(f"Iter: {i}, dijkstra score: {self.baseScore:,}, ACO score: {self.bestSolutionScore:,}, current: {total}, dijkstra max density: {self.baseWorstTrafficDensity}, ACO max density: {self.bestSolutionWorstTrafficDensity}, current max density: {worstTrafficDensity}, dijkstra average density: {self.baseAverageTrafficDensity}, ACO average density: {self.bestSolutionAverageTrafficDensity}, current average density: {constants.NUM_VEHICLES/len(visited)}")
 
             if constants.DECAY_GLOBAL_PHEROMONES:
                 self.globalTrafficDensity = temp.copy()

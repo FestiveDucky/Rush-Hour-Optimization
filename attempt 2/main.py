@@ -1,5 +1,6 @@
 import random
 import time
+import constants
 
 from simulation import Simulation
 
@@ -9,7 +10,7 @@ if __name__ == '__main__':
     s = Simulation()
 
     start = time.time()
-    s.execute(500)
+    s.execute(constants.ITERATIONS)
     print(f"Execution time: {time.time() - start}")
 # NOTES
 # Increasing decay rates actually keeps ants on same path as it deletes all alternate paths and just keeps the current one
@@ -17,14 +18,18 @@ if __name__ == '__main__':
 
 # Utilized data/code outside of python: https://www.openstreetmap.org/#map=7/39.436/-79.958, matplotlib, lxml, numpy, heapdict, geopy
 
+# Poster Stuff
+# Data analysis: look at random start location (in millburn) all to one destination
+#       - Run many iterations of each with random seeds
+# Data analysis: look at decrease in # of vehicles on the most dense roads
+
 # TODO change deposit of pheromones based on current path score to be somewhat related to best global path score
 #       - (MAYBE NOT) add adaptable MAX_PHEROMONE_FOR_GLOBAL_BEST_PATH -> gets larger for when we deviate upward -> smaller when we get closer
 #       - Store how long it have been since previous improvment -> change variab;es based on this and diff between current sol and prev sol
 #       - lots of failed to reach destination -> increase heuristic
-# TODO Data analysis: look at decrease in # of vehicles on the most dense roads
+
 # TODO Data analysis: look at running time / iterations to reach ~ best solution
-# TODO Data analysis: look at random start location (in millburn) all to one destination
-#       - Run many iterations of each with random seeds
+# TODO Data analysis: worst vehicle distance increase & (average travel distance increase)
 # TODO: Any time/memory improvements (fix matplotlib laggy graphing)
 # TODO debug/tune program
 

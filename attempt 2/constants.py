@@ -1,3 +1,5 @@
+ITERATIONS = 50
+
 SCALE = 1
 N_VERTICES = 100 * SCALE
 M_EDGES = 200 * SCALE
@@ -9,9 +11,9 @@ INCOMPLETE_PENALTY = 1e6
 MAX_PATH_LENGTH = N_VERTICES
 MAX_ROAD_LENGTH = 1005
 MIN_ROAD_LENGTH = 1
-NUM_VEHICLES = 440
+NUM_VEHICLES = 400
 PHEROMONE_DEPOSIT_CONSTANT = 1
-NUM_ANTS = 50 # per vehicle
+NUM_ANTS = 10 # per vehicle
 MIN_ROAD_SPACE_PER_CAR = 10 # distance between vehicles (includes vehicle length) at which point there is severe traffic
 
 p = 0.95 # probability cap for edge selection (only works for p > 0.5)
@@ -21,12 +23,12 @@ MAX_PHEROMONE_FOR_GLOBAL_BEST_PATH = 5
 # PHEROMONE_DEPOSIT_FOR_GLOBAL_BEST_PATH =
 
 # for cost function (closer to 0 -> greater punishment for smaller number of vehicles)
-GLOBAL_PHEROMONE_EXPONENT = 0.7
-MAX_GLOBAL_PHEROMONE_MULTIPLIER = 3 # Maximum multiplier as a result of the global traffic
+GLOBAL_PHEROMONE_EXPONENT = 0.9
+MAX_GLOBAL_PHEROMONE_MULTIPLIER = 2 # Maximum multiplier as a result of the global traffic
 
 # for weights during edge selection
 PHEROMONE_EXPONENT = 5 # Pheromone exponent
-HEURISTIC_EXPONENT = 20 # Heuristic exponent
+HEURISTIC_EXPONENT = 7 # Heuristic exponent
 # NOTE: low ants need high heuristic exponent
 GLOBAL_EXPONENT = 5 # traffic density exponent
 
@@ -35,7 +37,7 @@ PROPORTION_OF_TOTAL_SCORE_TO_ADAPT = 0.1
 MINIMUM_NUMBER_OF_SCORES_TO_ADAPT = 8
 
 # Only one of the following should be true (if both are false a random graph is generated
-LOAD_GRAPH_DATA = True # Already precalculated city data
+LOAD_GRAPH_DATA = False # Already precalculated city data
 IMPORT_GRAPH_DATA = False # Calculates new city data based on osm data
 
 SAME_DESTINATION = True # determines whether all the vehicles have the same destination
