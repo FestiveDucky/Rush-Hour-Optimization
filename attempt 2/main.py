@@ -4,7 +4,8 @@ import constants
 
 from simulation import Simulation
 
-random.seed(8324932980)
+# 8324932980
+random.seed(8324932981)
 if __name__ == '__main__':
 
     s = Simulation()
@@ -28,8 +29,6 @@ if __name__ == '__main__':
 #       - Store how long it have been since previous improvment -> change variab;es based on this and diff between current sol and prev sol
 #       - lots of failed to reach destination -> increase heuristic
 
-# TODO Data analysis: look at running time / iterations to reach ~ best solution
-# TODO Data analysis: worst vehicle distance increase & (average travel distance increase)
 # TODO: Any time/memory improvements (fix matplotlib laggy graphing)
 # TODO debug/tune program
 
@@ -37,7 +36,7 @@ if __name__ == '__main__':
 # TODO ( Decrease pheromones on trails that result in us looping back on ourselves -> set pheromone to min pheromone amount)
 # TODO ADAPTABILITY Store running average of past ~10 scores / differences among them and if they are close together ->
 #       - also increase decay rate over time/ decrease heuristic assistance
-# TODO make the algorithm prefer better solutions and to try and stay on them
+# TODO make the algorithm replace heuristic with best COMPLETE Path
 
 # TODO Maybe MAKE THE VEHICLES NOT BE AFFECTED BY THEIR OWN GLOBAL PHEROMONES (but rn it kinda acts as a push away from current path)
 # TODO add the ability to pheromone update the top 20% of paths
@@ -53,3 +52,10 @@ if __name__ == '__main__':
 # TODO EXTRA: Any time/memory improvements
 # 158885.52607098
 # 274393.73139896
+
+
+
+# Science Research Notes
+# They will most likely ask how it compares to contemporary work
+#
+

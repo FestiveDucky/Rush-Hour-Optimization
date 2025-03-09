@@ -4,22 +4,22 @@ SCALE = 1
 N_VERTICES = 100 * SCALE
 M_EDGES = 200 * SCALE
 
-PHEROMONE_DECAY_RATE = 0.9
+PHEROMONE_DECAY_RATE = 0.8
 GLOBAL_PHEROMONE_DECAY_RATE = 0.7
 INITIAL_PHEROMONE_VALUE = 1. # need a decimal point after number
-INCOMPLETE_PENALTY = 1e6
+INCOMPLETE_PENALTY = 1e6 # TODO change to a multiplier on dijkstra cost
 MAX_PATH_LENGTH = N_VERTICES
 MAX_ROAD_LENGTH = 1005
 MIN_ROAD_LENGTH = 1
-NUM_VEHICLES = 400
+NUM_VEHICLES = 200
 PHEROMONE_DEPOSIT_CONSTANT = 1
-NUM_ANTS = 10 # per vehicle
+NUM_ANTS = 20 # per vehicle
 MIN_ROAD_SPACE_PER_CAR = 10 # distance between vehicles (includes vehicle length) at which point there is severe traffic
 
-p = 0.95 # probability cap for edge selection (only works for p > 0.5)
+p = 0.9 # probability cap for edge selection (only works for p > 0.5)
 MIN_PHEROMONE_VALUE = 0.01
 MAX_PHEROMONE_VALUE = 20
-MAX_PHEROMONE_FOR_GLOBAL_BEST_PATH = 5
+MAX_PHEROMONE_FOR_GLOBAL_BEST_PATH = 10
 # PHEROMONE_DEPOSIT_FOR_GLOBAL_BEST_PATH =
 
 # for cost function (closer to 0 -> greater punishment for smaller number of vehicles)
@@ -27,10 +27,10 @@ GLOBAL_PHEROMONE_EXPONENT = 0.9
 MAX_GLOBAL_PHEROMONE_MULTIPLIER = 2 # Maximum multiplier as a result of the global traffic
 
 # for weights during edge selection
-PHEROMONE_EXPONENT = 5 # Pheromone exponent
-HEURISTIC_EXPONENT = 7 # Heuristic exponent
+PHEROMONE_EXPONENT = 15 # Pheromone exponent
+HEURISTIC_EXPONENT = 4 # Heuristic exponent (you want it higher for times when we ain't reaching the end much
 # NOTE: low ants need high heuristic exponent
-GLOBAL_EXPONENT = 5 # traffic density exponent
+GLOBAL_EXPONENT = 7 # traffic density exponent
 
 # the proportion of the  average score that the range of past 10 scores has to be below to enable automatic adaptation
 PROPORTION_OF_TOTAL_SCORE_TO_ADAPT = 0.1
