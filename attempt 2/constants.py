@@ -28,7 +28,7 @@ MAX_GLOBAL_PHEROMONE_MULTIPLIER = 2 # Maximum multiplier as a result of the glob
 
 # for weights during edge selection
 PHEROMONE_EXPONENT = 15 # Pheromone exponent
-HEURISTIC_EXPONENT = 40 # Heuristic exponent (you want it higher for times when we ain't reaching the end much
+HEURISTIC_EXPONENT = 10 # Heuristic exponent (you want it higher for times when we ain't reaching the end much
 # NOTE: low ants need high heuristic exponent
 GLOBAL_EXPONENT = 7 # traffic density exponent
 
@@ -37,10 +37,10 @@ PROPORTION_OF_TOTAL_SCORE_TO_ADAPT = 0.3
 MINIMUM_NUMBER_OF_SCORES_TO_ADAPT = 8
 
 # Only one of the following should be true (if both are false a random graph is generated
-LOAD_GRAPH_DATA = True # Already precalculated city data
+LOAD_GRAPH_DATA = False # Already precalculated city data
 IMPORT_GRAPH_DATA = False # Calculates new city data based on osm data
 
-SAME_DESTINATION = True # determines whether all the vehicles have the same destination
+SAME_DESTINATION = False # determines whether all the vehicles have the same destination
 DEPOSIT_PHEROMONES_ON_GLOBAL_BEST = True # Whether we deposit extra pheromones along the global best solution ever
 PRINT_DIJKSTRA_PATHS = False # whether we print the paths found by dijkstra
 PRINT_ALL_ITERATIONS = True # Whether we print the best paths & scores for the paths for every vehicle every iteration

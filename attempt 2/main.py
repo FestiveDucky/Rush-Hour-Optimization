@@ -5,7 +5,7 @@ import constants
 from simulation import Simulation
 
 # 8324932980
-random.seed(8324932981)
+random.seed(8324932983)
 if __name__ == '__main__':
 
     s = Simulation()
