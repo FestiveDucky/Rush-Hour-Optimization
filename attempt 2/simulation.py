@@ -272,18 +272,21 @@ class Simulation:
                 averageScore /= constants.MINIMUM_NUMBER_OF_SCORES_TO_ADAPT
                 scoreRange = maxScore - minScore
 
+                # TODO instead of checking past x scores, check whether the best score has changed
+                # TODO If the current scores are much higher than the best score change best path deposit, increase p and decrease decay rate value
+                # TODO if the best score has not changed much, decrease heuristic slightly, p and increase decay rate value
+
                 # If they are then we enable automatic adaptation
                 if scoreRange <= constants.PROPORTION_OF_TOTAL_SCORE_TO_ADAPT * averageScore:
                     print(f"Enabled automatic adaptation on iteration {i}")
                     # constants.PHEROMONE_DECAY_RATE = 0.8
-                    constants.HEURISTIC_EXPONENT = 1
-                    constants.PHEROMONE_EXPONENT = 5
+                    constants.HEURISTIC_EXPONENT *= 0.5
                     # constants.GLOBAL_EXPONENT = 50
                     # constants.p = 0.6
                 # else:
                 #     constants.PHEROMONE_DECAY_RATE = 0.85
                 #     constants.PHEROMONE_EXPONENT = 50
                 #     constants.p = 0.99
-                print(f"Iteration: {i}, p: {constants.p}, decay rate: {constants.PHEROMONE_DECAY_RATE}")
+                # print(f"Iteration: {i}, p: {constants.p}, decay rate: {constants.PHEROMONE_DECAY_RATE}")
         # Permanently show the graph at the end of the simulation
         plt.show()

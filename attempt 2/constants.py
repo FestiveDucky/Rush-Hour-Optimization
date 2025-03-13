@@ -1,4 +1,4 @@
-ITERATIONS = 50
+ITERATIONS = 500
 
 SCALE = 1
 N_VERTICES = 100 * SCALE
@@ -28,16 +28,16 @@ MAX_GLOBAL_PHEROMONE_MULTIPLIER = 2 # Maximum multiplier as a result of the glob
 
 # for weights during edge selection
 PHEROMONE_EXPONENT = 15 # Pheromone exponent
-HEURISTIC_EXPONENT = 4 # Heuristic exponent (you want it higher for times when we ain't reaching the end much
+HEURISTIC_EXPONENT = 40 # Heuristic exponent (you want it higher for times when we ain't reaching the end much
 # NOTE: low ants need high heuristic exponent
 GLOBAL_EXPONENT = 7 # traffic density exponent
 
 # the proportion of the  average score that the range of past 10 scores has to be below to enable automatic adaptation
-PROPORTION_OF_TOTAL_SCORE_TO_ADAPT = 0.1
+PROPORTION_OF_TOTAL_SCORE_TO_ADAPT = 0.3
 MINIMUM_NUMBER_OF_SCORES_TO_ADAPT = 8
 
 # Only one of the following should be true (if both are false a random graph is generated
-LOAD_GRAPH_DATA = False # Already precalculated city data
+LOAD_GRAPH_DATA = True # Already precalculated city data
 IMPORT_GRAPH_DATA = False # Calculates new city data based on osm data
 
 SAME_DESTINATION = True # determines whether all the vehicles have the same destination
