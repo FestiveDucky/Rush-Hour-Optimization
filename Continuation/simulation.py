@@ -24,6 +24,8 @@ class Simulation:
         self.bestSolutionScore = float('inf')
         self.bestSolutionWorstTrafficDensity = 0
         self.bestSolutionAverageTrafficDensity = 0
+        self.bestAverageTravelDistance = 0
+        self.bestWorstTravelDistance = 0
 
         self.destinations = set()
         # Generate vehicles
@@ -41,6 +43,8 @@ class Simulation:
         self.baseScore = 0
         self.baseWorstTrafficDensity = 0
         self.baseAverageTrafficDensity = 0
+        self.baseAverageTravelDistance = 0
+        self.baseWorstTravelDistance = 0
 
         # key: destination, value: list of vertices and their distance from the end location
         self.heuristics = {}
@@ -109,25 +113,31 @@ class Simulation:
             v = self.vehicles[i].start
             u = parents[self.vehicles[i].end][v]
 
+            pathLength = 0
             path = [v, u]
             while u != -1:
                 roadLength = self.graph.edgeWeight(u, v)
                 globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
                 if constants.COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
+                    # self.baseScore += constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(roadLength / (constants.MIN_ROAD_SPACE_PER_CAR * globalPheromone), constants.GLOBAL_PHEROMONE_EXPONENT)
                     self.baseScore += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
                         roadLength / constants.MIN_ROAD_SPACE_PER_CAR, constants.GLOBAL_PHEROMONE_EXPONENT)
                 else:
                     # Cost not based on traffic density
                     self.baseScore += roadLength
+                pathLength += roadLength
 
                 v = u
                 u = parents[self.vehicles[i].end][v]
 
                 if constants.PRINT_DIJKSTRA_PATHS:
                     path.append(u)
+            self.baseWorstTravelDistance = max(self.baseWorstTravelDistance, pathLength)
+            self.baseAverageTravelDistance += pathLength
             if constants.PRINT_DIJKSTRA_PATHS:
                 print(f"PATH: {path}, score {self.baseScore}")
 
+        self.baseAverageTravelDistance /= constants.NUM_VEHICLES
         # Reset global pheromones
         self.globalTrafficDensity = np.zeros((constants.N_VERTICES, constants.N_VERTICES))
 
@@ -164,8 +174,15 @@ class Simulation:
     def plot(self):
         # plt.scatter(len(self.scores), self.scores[-1])
         plt.cla()
-        plt.plot(range(1, len(self.scores) + 1), [self.baseScore] * len(self.scores))
-        plt.plot(range(1, len(self.scores) + 1), self.scores)
+        plt.xlabel("Iteration Number")
+        plt.ylabel("Algorithm Score (Cost Function)")
+        plt.title("Traffic Congestion Routing Solution Scores")
+
+        # plt.legend(loc)
+
+        plt.plot(range(1, len(self.scores) + 1), [self.baseScore] * len(self.scores), label="Dijkstra")
+        plt.plot(range(1, len(self.scores) + 1), self.scores, label = "ACO")
+        plt.legend()
         # plt.savefig("graph7.png")
         plt.pause(0.01)
 
@@ -216,9 +233,12 @@ class Simulation:
 
             currentSolution = {}
             total = 0
+            totalLength = 0
+            worstLength = 0
             # Final analysis
             for path in paths:
                 # COST FUNCTION NEEDED BECAUSE DURING EXECUTION GLOBAL PHEROMONES ARE NOT UPDATED
+                pathLength = 0
                 pathScore = 0
                 for j in range(1, len(path[0])):
                     v = path[0][j - 1]
@@ -227,12 +247,17 @@ class Simulation:
                     roadLength = self.graph.edgeWeight(u, v)
                     globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
                     if constants.COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
+                        # pathScore += constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(roadLength / (constants.MIN_ROAD_SPACE_PER_CAR * globalPheromone), constants.GLOBAL_PHEROMONE_EXPONENT)
+
                         pathScore += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
                             roadLength / constants.MIN_ROAD_SPACE_PER_CAR, constants.GLOBAL_PHEROMONE_EXPONENT)
                     else:
                         # Cost not based on traffic density
                         pathScore += roadLength
+                    pathLength += roadLength
 
+                worstLength = max(worstLength, pathLength)
+                totalLength += pathLength
                 if len(path[0]) == 0:
                     pathScore += constants.INCOMPLETE_PENALTY
 
@@ -245,10 +270,12 @@ class Simulation:
                 self.bestSolution = currentSolution.copy()
                 self.bestSolutionAverageTrafficDensity = constants.NUM_VEHICLES/len(visited)
                 self.bestSolutionWorstTrafficDensity = worstTrafficDensity
+                self.bestAverageTravelDistance = totalLength / len(paths)
+                self.bestWorstTravelDistance = worstLength
 
             if constants.PRINT_ALL_ITERATIONS or i == iterations - 1:
                 # score: {path[1]}, path: {path[0]},
-                print(f"Iter: {i}, dijkstra score: {self.baseScore:,}, ACO score: {self.bestSolutionScore:,}, current: {total}, dijkstra max density: {self.baseWorstTrafficDensity}, ACO max density: {self.bestSolutionWorstTrafficDensity}, current max density: {worstTrafficDensity}, dijkstra average density: {self.baseAverageTrafficDensity}, ACO average density: {self.bestSolutionAverageTrafficDensity}, current average density: {constants.NUM_VEHICLES/len(visited)}")
+                print(f"Iter: {i}, dijkstra score: {self.baseScore:,}, ACO score: {self.bestSolutionScore:,}, current: {total}, dijkstra max density: {self.baseWorstTrafficDensity}, ACO max density: {self.bestSolutionWorstTrafficDensity}, current max density: {worstTrafficDensity}, dijkstra average density: {self.baseAverageTrafficDensity}, ACO average density: {self.bestSolutionAverageTrafficDensity}, current average density: {constants.NUM_VEHICLES/len(visited)}, dijkstra average travel : {self.baseAverageTravelDistance}, ACO average travel: {self.bestAverageTravelDistance}, current average travel: {totalLength / len(paths)}, dijkstra worst travel: {self.baseWorstTravelDistance}, ACO worst travel: {self.bestWorstTravelDistance}, current worst travel: {worstLength}")
 
             if constants.DECAY_GLOBAL_PHEROMONES:
                 self.globalTrafficDensity = temp.copy()

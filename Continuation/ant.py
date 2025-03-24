@@ -93,6 +93,10 @@ class Ant:
                 max(path[-2] - 1, path[-1] - 1)]
             # Exponential traffic cost multiplier (1 + x^exp/n^exp)
             if constants.COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
+                # score += constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(
+                #     roadLength / (constants.MIN_ROAD_SPACE_PER_CAR * globalPheromone),
+                #     constants.GLOBAL_PHEROMONE_EXPONENT)
+
                 score += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(roadLength/constants.MIN_ROAD_SPACE_PER_CAR, constants.GLOBAL_PHEROMONE_EXPONENT)
                 # assuming each car needs around 15 m of space -> around 10m of space will result in severe traffic
             else:

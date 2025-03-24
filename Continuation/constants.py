@@ -1,6 +1,6 @@
 ITERATIONS = 500
 
-SCALE = 1
+SCALE = 2
 N_VERTICES = 100 * SCALE
 M_EDGES = 200 * SCALE
 
@@ -11,7 +11,7 @@ INCOMPLETE_PENALTY = 1e6 # TODO change to a multiplier on dijkstra cost
 MAX_PATH_LENGTH = N_VERTICES
 MAX_ROAD_LENGTH = 1005
 MIN_ROAD_LENGTH = 1
-NUM_VEHICLES = 200
+NUM_VEHICLES = 400
 PHEROMONE_DEPOSIT_CONSTANT = 1
 NUM_ANTS = 20 # per vehicle
 MIN_ROAD_SPACE_PER_CAR = 10 # distance between vehicles (includes vehicle length) at which point there is severe traffic
@@ -28,7 +28,7 @@ MAX_GLOBAL_PHEROMONE_MULTIPLIER = 2 # Maximum multiplier as a result of the glob
 
 # for weights during edge selection
 PHEROMONE_EXPONENT = 15 # Pheromone exponent
-HEURISTIC_EXPONENT = 10 # Heuristic exponent (you want it higher for times when we ain't reaching the end much
+HEURISTIC_EXPONENT = 40 # Heuristic exponent (you want it higher for times when we ain't reaching the end much
 # NOTE: low ants need high heuristic exponent
 GLOBAL_EXPONENT = 7 # traffic density exponent
 

@@ -5,7 +5,7 @@ import constants
 from simulation import Simulation
 
 # 8324932980
-random.seed(8324932983)
+random.seed(832493298453465)
 if __name__ == '__main__':
 
     s = Simulation()
@@ -23,6 +23,9 @@ if __name__ == '__main__':
 # Data analysis: look at random start location (in millburn) all to one destination
 #       - Run many iterations of each with random seeds
 # Data analysis: look at decrease in # of vehicles on the most dense roads
+
+# TODO adjust cost functions to include an exponent for the roadlength -> prioritizes shorter paths
+
 
 # TODO change deposit of pheromones based on current path score to be somewhat related to best global path score
 #       - (MAYBE NOT) add adaptable MAX_PHEROMONE_FOR_GLOBAL_BEST_PATH -> gets larger for when we deviate upward -> smaller when we get closer
