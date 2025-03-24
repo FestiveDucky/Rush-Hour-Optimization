@@ -16,7 +16,7 @@ if __name__ == '__main__':
 # NOTES
 # Increasing decay rates actually keeps ants on same path as it deletes all alternate paths and just keeps the current one
 # Adjust p to be higher than 80% as if your road is very long (80%) means that there is a very low probability of selecting every edge
-
+# Without plotting we are ~ 0.1 - 0.4 s faster per iteration
 # Utilized data/code outside of python: https://www.openstreetmap.org/#map=7/39.436/-79.958, matplotlib, lxml, numpy, heapdict, geopy
 
 # Poster Stuff

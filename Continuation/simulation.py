@@ -118,13 +118,13 @@ class Simulation:
             while u != -1:
                 roadLength = self.graph.edgeWeight(u, v)
                 globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
-                if constants.COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
-                    # self.baseScore += constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(roadLength / (constants.MIN_ROAD_SPACE_PER_CAR * globalPheromone), constants.GLOBAL_PHEROMONE_EXPONENT)
+                # self.baseScore += constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(roadLength / (constants.MIN_ROAD_SPACE_PER_CAR * globalPheromone), constants.GLOBAL_PHEROMONE_EXPONENT)
+                if globalPheromone != 0:
                     self.baseScore += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
                         roadLength / constants.MIN_ROAD_SPACE_PER_CAR, constants.GLOBAL_PHEROMONE_EXPONENT)
                 else:
-                    # Cost not based on traffic density
                     self.baseScore += roadLength
+
                 pathLength += roadLength
 
                 v = u
@@ -149,14 +149,12 @@ class Simulation:
             self.graph.importData()
             constants.N_VERTICES = self.graph.n
             constants.M_EDGES = self.graph.m
-            # print("--------------------------------------FINISHED--------------------------------------------------")
             return
 
         if constants.LOAD_GRAPH_DATA:
             self.graph.loadFromFile()
             constants.N_VERTICES = self.graph.n
             constants.M_EDGES = self.graph.m
-            # print("--------------------------------------FINISHED--------------------------------------------------")
             return
 
         # Generates a random graph with random weights
@@ -187,19 +185,13 @@ class Simulation:
         plt.pause(0.01)
 
     def execute(self, iterations):
-        pool = None
-        if constants.MULTIPROCESSING:
-            pool = multiprocessing.Pool(processes=8)
-
-        # bestPath = (None, math.inf)
         for i in range(iterations):
+            # start = time.perf_counter()
+
             # paths: (path, score, vehicle id)
-            if constants.MULTIPROCESSING:
-                paths = list(pool.map(self.iterate, self.vehicles))
-            else:
-                paths = []
-                for vehicle in self.vehicles:
-                    paths.append(vehicle.iterate())
+            paths = []
+            for vehicle in self.vehicles:
+                paths.append(vehicle.iterate())
 
             # Global pheromones
             temp = None
@@ -215,16 +207,16 @@ class Simulation:
 
             for path in paths:
                 for j in range(1, len(path[0])):
-                    v = path[0][j - 1]
-                    u = path[0][j]
-                    visited.add((min(u, v), max(u, v)))
-                    self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
-                    self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(constants.NUM_VEHICLES, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
+                    v = max(path[0][j - 1] - 1, path[0][j] - 1)
+                    u = min(path[0][j - 1] - 1, path[0][j] - 1)
+                    visited.add((u, v))
+                    self.globalTrafficDensity[u][v] += 1
+                    self.globalTrafficDensity[u][v] = min(constants.NUM_VEHICLES, self.globalTrafficDensity[u][v])
 
-                    worstTrafficDensity = max(worstTrafficDensity, self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)])
+                    worstTrafficDensity = max(worstTrafficDensity, self.globalTrafficDensity[u][v])
                     if constants.DECAY_GLOBAL_PHEROMONES:
-                        temp[min(u - 1, v - 1)][max(u - 1, v - 1)] += 1
-                        temp[min(u - 1, v - 1)][max(u - 1, v - 1)] = min(constants.NUM_VEHICLES, temp[min(u - 1, v - 1)][max(u - 1, v - 1)])
+                        temp[u][v] += 1
+                        temp[u][v] = min(constants.NUM_VEHICLES, temp[u][v])
 
             if not constants.PRINT_ALL_ITERATIONS:
                 sys.stdout.write(f"\rCompleted: {100 * (i + 1) / iterations}%")
@@ -246,14 +238,14 @@ class Simulation:
 
                     roadLength = self.graph.edgeWeight(u, v)
                     globalPheromone = self.globalTrafficDensity[min(u - 1, v - 1)][max(u - 1, v - 1)]
-                    if constants.COST_BASED_ON_TRAFFIC_DENSITY and globalPheromone != 0:
-                        # pathScore += constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(roadLength / (constants.MIN_ROAD_SPACE_PER_CAR * globalPheromone), constants.GLOBAL_PHEROMONE_EXPONENT)
-
-                        pathScore += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone, constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
+                    # pathScore += constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(roadLength / (constants.MIN_ROAD_SPACE_PER_CAR * globalPheromone), constants.GLOBAL_PHEROMONE_EXPONENT)
+                    if globalPheromone != 0:
+                        pathScore += roadLength * constants.MAX_GLOBAL_PHEROMONE_MULTIPLIER * math.pow(globalPheromone,
+                                                                                                       constants.GLOBAL_PHEROMONE_EXPONENT) / math.pow(
                             roadLength / constants.MIN_ROAD_SPACE_PER_CAR, constants.GLOBAL_PHEROMONE_EXPONENT)
                     else:
-                        # Cost not based on traffic density
                         pathScore += roadLength
+
                     pathLength += roadLength
 
                 worstLength = max(worstLength, pathLength)
@@ -279,11 +271,10 @@ class Simulation:
 
             if constants.DECAY_GLOBAL_PHEROMONES:
                 self.globalTrafficDensity = temp.copy()
-
             self.scores.append(total)
             self.plot()
 
-
+            # print(time.perf_counter() - start)
 
             if constants.AUTOMATIC_ADJUSTMENT_OF_CONSTANTS and len(self.scores) >= constants.MINIMUM_NUMBER_OF_SCORES_TO_ADAPT:
                 # Check if the past 10 scores are ~ the same
